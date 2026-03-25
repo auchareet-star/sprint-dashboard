@@ -1,3 +1,4 @@
+import { T } from '../utils/typography';
 import SlideLayout from '../components/SlideLayout';
 import KPICard from '../components/KPICard';
 import HorizontalStackedBar from '../charts/HorizontalStackedBar';
@@ -25,10 +26,10 @@ export default function ExecutiveSummary({ data, slideRef }) {
             className="card flex flex-col animate-slide-up animate-delay-2"
             style={{ padding: '16px 20px 12px', flex: 7 }}
           >
-            <h2 className="font-semibold" style={{ fontSize: 15, color: '#0F172A', margin: '0 0 2px 4px', letterSpacing: '-0.01em' }}>
+            <h2 className="font-semibold" style={{ fontSize: T.section, color: '#0F172A', margin: '0 0 2px 4px', letterSpacing: '-0.01em' }}>
               Planned vs Unplanned by Status
             </h2>
-            <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 2px 4px', fontWeight: 500 }}>
+            <p style={{ fontSize: T.desc, color: '#94A3B8', margin: '0 0 2px 4px', fontWeight: 500 }}>
               Breakdown of work items across statuses
             </p>
             <div className="flex-1 min-h-0">
@@ -41,7 +42,7 @@ export default function ExecutiveSummary({ data, slideRef }) {
             className="card flex flex-col animate-slide-up animate-delay-3"
             style={{ padding: '16px 20px', flex: 3 }}
           >
-            <h2 className="font-semibold" style={{ fontSize: 15, color: '#0F172A', margin: '0 0 8px 0', letterSpacing: '-0.01em' }}>
+            <h2 className="font-semibold" style={{ fontSize: T.section, color: '#0F172A', margin: '0 0 8px 0', letterSpacing: '-0.01em' }}>
               Key Insights
             </h2>
             <div className="flex flex-col gap-3 flex-1">

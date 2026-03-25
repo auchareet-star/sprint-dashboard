@@ -1,3 +1,4 @@
+import { T } from '../utils/typography';
 import SlideLayout from '../components/SlideLayout';
 import GroupedBarChart from '../charts/GroupedBarChart';
 import DonutChart from '../charts/DonutChart';
@@ -29,10 +30,10 @@ export default function EffortOverview({ data, slideRef }) {
             className="card flex-1 flex flex-col animate-slide-up animate-delay-2"
             style={{ padding: '16px 20px 12px' }}
           >
-            <h2 className="font-semibold" style={{ fontSize: 15, color: '#0F172A', margin: '0 0 2px 4px', letterSpacing: '-0.01em' }}>
+            <h2 className="font-semibold" style={{ fontSize: T.section, color: '#0F172A', margin: '0 0 2px 4px', letterSpacing: '-0.01em' }}>
               Estimate vs Actual
             </h2>
-            <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 2px 4px', fontWeight: 500 }}>
+            <p style={{ fontSize: T.desc, color: '#94A3B8', margin: '0 0 2px 4px', fontWeight: 500 }}>
               Man-days comparison by work status
             </p>
             <div className="flex-1 min-h-0">
@@ -45,10 +46,10 @@ export default function EffortOverview({ data, slideRef }) {
             className="card flex flex-col animate-slide-up animate-delay-3"
             style={{ width: 420, padding: '16px 20px 12px' }}
           >
-            <h2 className="font-semibold" style={{ fontSize: 15, color: '#0F172A', margin: '0 0 2px 4px', letterSpacing: '-0.01em' }}>
+            <h2 className="font-semibold" style={{ fontSize: T.section, color: '#0F172A', margin: '0 0 2px 4px', letterSpacing: '-0.01em' }}>
               Status Distribution
             </h2>
-            <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 0 4px', fontWeight: 500 }}>
+            <p style={{ fontSize: T.desc, color: '#94A3B8', margin: '0 0 0 4px', fontWeight: 500 }}>
               Card count by current status
             </p>
             <div className="flex-1 min-h-0 w-full flex items-center justify-center">

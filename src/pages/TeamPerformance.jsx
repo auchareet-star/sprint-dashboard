@@ -1,3 +1,4 @@
+import { T } from '../utils/typography';
 import SlideLayout from '../components/SlideLayout';
 import StackedBarChart from '../charts/StackedBarChart';
 import {
@@ -58,19 +59,34 @@ function TotalOnTop({ x, y, width, height, index, statusKey, data }) {
 }
 
 function ClickableTick({ x, y, payload, goToAssignee }) {
+  const text = payload.value || '';
+  // Split into max 2 lines at space closest to middle
+  let lines;
+  if (text.length <= 16) {
+    lines = [text];
+  } else {
+    const mid = Math.floor(text.length / 2);
+    let best = -1;
+    for (let i = 0; i < text.length; i++) {
+      if (text[i] === ' ' && (best === -1 || Math.abs(i - mid) < Math.abs(best - mid))) best = i;
+    }
+    lines = best > 0 ? [text.slice(0, best), text.slice(best + 1)] : [text];
+  }
+  const lh = 15;
+  const topY = y - ((lines.length - 1) * lh) / 2;
   return (
     <text
       x={x}
-      y={y}
       textAnchor="end"
-      dominantBaseline="central"
       fontSize={13}
       fontWeight={500}
       fill="#1E3A5F"
-      style={{ cursor: goToAssignee ? 'pointer' : 'default', textDecoration: goToAssignee ? 'underline' : 'none', textDecorationColor: '#CBD5E1' }}
+      style={{ cursor: goToAssignee ? 'pointer' : 'default' }}
       onClick={() => goToAssignee?.(payload.value)}
     >
-      {payload.value}
+      {lines.map((line, i) => (
+        <tspan key={i} x={x} y={topY + i * lh}>{line}</tspan>
+      ))}
     </text>
   );
 }
@@ -112,56 +128,25 @@ export default function TeamPerformance({ data, slideRef, goToAssignee }) {
       <div className="flex gap-4 h-full">
         {/* Total */}
         <div className="card flex flex-col animate-slide-up animate-delay-1" style={{ padding: '16px 20px 12px', flex: 1.1 }}>
-          <h2 className="font-semibold" style={{ fontSize: 15, color: '#0F172A', margin: '0 0 1px 4px', letterSpacing: '-0.01em' }}>Total by Assignee</h2>
-          <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 2px 4px', fontWeight: 500 }}>Planned + Unplanned</p>
+          <h2 className="font-semibold" style={{ fontSize: T.section, color: '#0F172A', margin: '0 0 1px 4px', letterSpacing: '-0.01em' }}>Total by Assignee</h2>
+          <p style={{ fontSize: T.desc, color: '#94A3B8', margin: '0 0 2px 4px', fontWeight: 500 }}>Planned + Unplanned</p>
           <div className="flex-1 min-h-0"><TotalChart data={data.teamTotal} height="100%" goToAssignee={goToAssignee} /></div>
         </div>
 
         {/* Planned */}
         <div className="card flex-1 flex flex-col animate-slide-up animate-delay-2" style={{ padding: '16px 20px 12px' }}>
-          <h2 className="font-semibold" style={{ fontSize: 15, color: '#0F172A', margin: '0 0 1px 4px', letterSpacing: '-0.01em' }}>Planned by Assignee</h2>
-          <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 2px 4px', fontWeight: 500 }}>Story cards per member</p>
+          <h2 className="font-semibold" style={{ fontSize: T.section, color: '#0F172A', margin: '0 0 1px 4px', letterSpacing: '-0.01em' }}>Planned by Assignee</h2>
+          <p style={{ fontSize: T.desc, color: '#94A3B8', margin: '0 0 2px 4px', fontWeight: 500 }}>Story cards per member</p>
           <div className="flex-1 min-h-0"><StackedBarChart data={data.teamPlanned} height="100%" /></div>
         </div>
 
         {/* Unplanned */}
         <div className="card flex-1 flex flex-col animate-slide-up animate-delay-3" style={{ padding: '16px 20px 12px' }}>
-          <h2 className="font-semibold" style={{ fontSize: 15, color: '#0F172A', margin: '0 0 1px 4px', letterSpacing: '-0.01em' }}>Unplanned by Assignee</h2>
-          <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 2px 4px', fontWeight: 500 }}>Task cards per member</p>
+          <h2 className="font-semibold" style={{ fontSize: T.section, color: '#0F172A', margin: '0 0 1px 4px', letterSpacing: '-0.01em' }}>Unplanned by Assignee</h2>
+          <p style={{ fontSize: T.desc, color: '#94A3B8', margin: '0 0 2px 4px', fontWeight: 500 }}>Task cards per member</p>
           <div className="flex-1 min-h-0"><StackedBarChart data={data.teamUnplanned} height="100%" /></div>
         </div>
 
-        {/* Assignee List */}
-        <div className="card flex flex-col animate-slide-up animate-delay-4" style={{ padding: '14px 16px 12px', width: 220 }}>
-          <h2 className="font-semibold" style={{ fontSize: 14, color: '#0F172A', margin: '0 0 8px 0', letterSpacing: '-0.01em' }}>View Cards</h2>
-          <div style={{ flex: 1, overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {data.teamTotal.map((t) => (
-              <button
-                key={t.assignee}
-                onClick={() => goToAssignee?.(t.assignee)}
-                className="cursor-pointer flex items-center justify-between"
-                style={{
-                  padding: '6px 10px',
-                  borderRadius: 8,
-                  border: '1px solid #E2E8F0',
-                  background: '#FFFFFF',
-                  fontSize: 12,
-                  fontWeight: 500,
-                  color: '#334155',
-                  textAlign: 'left',
-                  transition: 'all 0.15s ease',
-                  flexShrink: 0,
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.borderColor = '#6366F1'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = '#FFFFFF'; e.currentTarget.style.borderColor = '#E2E8F0'; }}
-              >
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{t.assignee}</span>
-                <span style={{ fontSize: 10, color: '#94A3B8', fontWeight: 600, marginLeft: 6, flexShrink: 0 }}>{t.Total}</span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 4, flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
     </SlideLayout>
   );

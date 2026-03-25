@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { toPng } from 'html-to-image';
+import { T } from '../utils/typography';
 
 const LOGO_URL = import.meta.env.BASE_URL + 'ayodia-logo.png';
 
@@ -24,7 +25,7 @@ export default function SlideLayout({ title, subtitle, children, slideRef }) {
             <h1
               className="font-extrabold tracking-tight"
               style={{
-                fontSize: 32,
+                fontSize: T.pageTitle,
                 margin: 0,
                 color: '#0F172A',
                 letterSpacing: '-0.025em',
@@ -47,7 +48,7 @@ export default function SlideLayout({ title, subtitle, children, slideRef }) {
               <p
                 className="mt-2"
                 style={{
-                  fontSize: 15,
+                  fontSize: T.subtitle,
                   color: '#94A3B8',
                   fontWeight: 500,
                   letterSpacing: '-0.01em',
@@ -168,7 +169,7 @@ export function ExportButton({ slideRef }) {
       disabled={exporting}
       className="export-hide text-white px-4 py-1.5 rounded-lg cursor-pointer"
       style={{
-        fontSize: 12,
+        fontSize: T.button,
         fontWeight: 600,
         background: 'linear-gradient(135deg, #1E3A5F, #6366F1)',
         border: 'none',
@@ -225,7 +226,7 @@ export function CopyImageButton({ slideRef }) {
       disabled={state === 'copying'}
       className="export-hide px-4 py-1.5 rounded-lg cursor-pointer flex items-center gap-1.5"
       style={{
-        fontSize: 12,
+        fontSize: T.button,
         fontWeight: 600,
         background: state === 'copied' ? '#F0FDF4' : '#FFFFFF',
         color: state === 'copied' ? '#16A34A' : state === 'error' ? '#F43F5E' : '#475569',

@@ -10,15 +10,29 @@ import {
   LabelList,
 } from 'recharts';
 import { STATUS_ORDER, STATUS_COLORS } from '../utils/colors';
+import { T, tooltipStyle, axisTickPrimary, axisTickSecondary, legendStyle } from '../utils/typography';
 
-const tooltipStyle = {
-  borderRadius: 12,
-  border: '1px solid #E2E8F0',
-  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-  fontSize: 13,
-  fontWeight: 500,
-  padding: '10px 14px',
-};
+function WrapTick({ x, y, payload }) {
+  const text = payload.value || '';
+  let lines;
+  if (text.length <= 16) {
+    lines = [text];
+  } else {
+    const mid = Math.floor(text.length / 2);
+    let best = -1;
+    for (let i = 0; i < text.length; i++) {
+      if (text[i] === ' ' && (best === -1 || Math.abs(i - mid) < Math.abs(best - mid))) best = i;
+    }
+    lines = best > 0 ? [text.slice(0, best), text.slice(best + 1)] : [text];
+  }
+  const lh = 15;
+  const topY = y - ((lines.length - 1) * lh) / 2;
+  return (
+    <text x={x} textAnchor="end" fontSize={T.chartAxis} fontWeight={500} fill="#334155">
+      {lines.map((l, i) => <tspan key={i} x={x} y={topY + i * lh}>{l}</tspan>)}
+    </text>
+  );
+}
 
 /**
  * Custom bar shape: rounds the right edge only if this segment is the topmost for that row.
@@ -69,7 +83,7 @@ function TotalOnTop({ x, y, width, height, index, statusKey, activeStatuses, dat
       x={x + width + 8}
       y={y + height / 2}
       fill="#475569"
-      fontSize={11}
+      fontSize={T.chartLabel}
       fontWeight={700}
       dominantBaseline="central"
     >
@@ -107,18 +121,18 @@ export default function StackedBarChart({
 
         {isHorizontal ? (
           <>
-            <XAxis dataKey={dataKeyX} tick={{ fontSize: 13, fill: '#334155', fontWeight: 500 }} axisLine={{ stroke: '#E2E8F0' }} tickLine={false} />
-            <YAxis tick={{ fontSize: 13, fill: '#94A3B8', fontWeight: 500 }} allowDecimals={false} axisLine={false} tickLine={false} />
+            <XAxis dataKey={dataKeyX} tick={axisTickPrimary} axisLine={{ stroke: '#E2E8F0' }} tickLine={false} />
+            <YAxis tick={axisTickSecondary} allowDecimals={false} axisLine={false} tickLine={false} />
           </>
         ) : (
           <>
-            <YAxis dataKey={dataKeyX} type="category" tick={{ fontSize: 13, fill: '#334155', fontWeight: 500 }} width={150} axisLine={false} tickLine={false} />
-            <XAxis type="number" tick={{ fontSize: 13, fill: '#94A3B8', fontWeight: 500 }} allowDecimals={false} axisLine={{ stroke: '#E2E8F0' }} tickLine={false} />
+            <YAxis dataKey={dataKeyX} type="category" tick={<WrapTick />} width={150} axisLine={false} tickLine={false} />
+            <XAxis type="number" tick={axisTickSecondary} allowDecimals={false} axisLine={{ stroke: '#E2E8F0' }} tickLine={false} />
           </>
         )}
 
         <Tooltip contentStyle={tooltipStyle} />
-        <Legend wrapperStyle={{ fontSize: 13, fontWeight: 600, paddingTop: 12, color: '#475569' }} iconType="circle" iconSize={8} />
+        <Legend wrapperStyle={legendStyle} iconType="circle" iconSize={8} />
 
         {activeStatuses.map((status) => (
           <Bar
@@ -140,7 +154,7 @@ export default function StackedBarChart({
               dataKey={status}
               position="center"
               fill="#fff"
-              fontSize={11}
+              fontSize={T.chartLabel}
               fontWeight={700}
               formatter={(v) => (v > 0 ? v : '')}
             />

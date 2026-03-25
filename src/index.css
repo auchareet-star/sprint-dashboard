@@ -17,6 +17,21 @@
   --color-text-muted: #64748B;
 }
 
+/* ─── Typography Scale ─── */
+:root {
+  --font-2xs: 10px;
+  --font-xs: 11px;
+  --font-sm: 12px;
+  --font-md: 13px;
+  --font-base: 14px;
+  --font-lg: 15px;
+  --font-xl: 22px;
+  --font-2xl: 28px;
+  --font-3xl: 34px;
+  --font-4xl: 44px;
+  --font-hero: 48px;
+}
+
 html, body, #root {
   margin: 0;
   padding: 0;
