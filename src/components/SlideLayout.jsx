@@ -1,56 +1,80 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { toPng, toBlob } from 'html-to-image';
 
+const LOGO_URL = 'https://www.ayodiacompany.com/wp-content/uploads/2024/12/Ayodia-Company-Logo-1024x1024.png';
+
 export default function SlideLayout({ title, subtitle, children, slideRef }) {
   return (
     <div
       ref={slideRef}
-      className="slide flex flex-col"
+      className="slide flex"
       style={{
-        padding: '36px 64px 28px',
         background: '#F8FAFC',
         overflow: 'hidden',
       }}
     >
-      {/* Header */}
-      <div className="flex-none mb-5 animate-slide-up">
-        <h1
-          className="font-extrabold tracking-tight"
-          style={{
-            fontSize: 38,
-            margin: 0,
-            color: '#0F172A',
-            letterSpacing: '-0.025em',
-          }}
-        >
-          {title}
-        </h1>
-        {subtitle && (
-          <p
-            className="mt-2"
-            style={{
-              fontSize: 17,
-              color: '#64748B',
-              fontWeight: 500,
-              letterSpacing: '-0.01em',
-            }}
-          >
-            {subtitle}
-          </p>
-        )}
-        <div
-          className="mt-4"
-          style={{
-            height: 3,
-            width: 56,
-            background: 'linear-gradient(90deg, #1E3A5F, #6366F1)',
-            borderRadius: 4,
-          }}
-        />
-      </div>
+      {/* Left black bar */}
+      <div style={{ width: 8, background: '#0F172A', flexShrink: 0 }} />
 
-      {/* Content */}
-      <div className="flex-1 min-h-0">{children}</div>
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col" style={{ padding: '32px 56px 24px' }}>
+        {/* Header row */}
+        <div className="flex-none mb-5 animate-slide-up flex items-start justify-between">
+          <div>
+            <h1
+              className="font-extrabold tracking-tight"
+              style={{
+                fontSize: 38,
+                margin: 0,
+                color: '#0F172A',
+                letterSpacing: '-0.025em',
+              }}
+            >
+              {title}
+            </h1>
+            {/* Yellow-red gradient underline bar */}
+            <div
+              style={{
+                height: 6,
+                width: 140,
+                background: 'linear-gradient(90deg, #FACC15 20%, #EF4444 20%)',
+                marginTop: 6,
+                borderRadius: 3,
+                boxShadow: '0 2px 6px rgba(245, 158, 11, 0.35)',
+              }}
+            />
+            {subtitle && (
+              <p
+                className="mt-2"
+                style={{
+                  fontSize: 17,
+                  color: '#64748B',
+                  fontWeight: 500,
+                  letterSpacing: '-0.01em',
+                }}
+              >
+                {subtitle}
+              </p>
+            )}
+          </div>
+
+          {/* Logo top-right */}
+          <img
+            src={LOGO_URL}
+            alt="Ayodia"
+            style={{
+              width: 72,
+              height: 72,
+              objectFit: 'contain',
+              flexShrink: 0,
+              marginLeft: 24,
+            }}
+          />
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-h-0">{children}</div>
+      </div>
     </div>
   );
 }
