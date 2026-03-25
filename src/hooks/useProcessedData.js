@@ -64,6 +64,12 @@ export function useProcessedData(cards, bugs) {
       return row;
     });
 
+    const teamTotal = topAssignees.map((name) => {
+      const p = planned.filter((c) => c.assignee === name).length;
+      const u = unplanned.filter((c) => c.assignee === name).length;
+      return { assignee: name, Planned: p, Unplanned: u, Total: p + u };
+    });
+
     // Effort gap
     const COMPLETED_STATUSES = ['Done', 'Wait for Deploy', 'Waiting for Test', 'Cancel'];
     const IN_PROGRESS_STATUSES = ['To Do', 'In Progress', 'Test Failed'];
@@ -122,6 +128,16 @@ export function useProcessedData(cards, bugs) {
       .filter((d) => d.value > 0)
       .sort((a, b) => b.value - a.value);
 
+    // Bugs by assignee
+    const bugAssigneeCounts = {};
+    bugs.forEach((b) => {
+      const a = b.assignee || 'Unassigned';
+      bugAssigneeCounts[a] = (bugAssigneeCounts[a] || 0) + 1;
+    });
+    const bugsByAssignee = Object.entries(bugAssigneeCounts)
+      .map(([assignee, count]) => ({ assignee, count }))
+      .sort((a, b) => b.count - a.count);
+
     return {
       total,
       plannedCount: planned.length,
@@ -136,6 +152,7 @@ export function useProcessedData(cards, bugs) {
       effortByStatus,
       teamPlanned,
       teamUnplanned,
+      teamTotal,
       topAssignees,
       effortGapDone,
       effortGapTodo,
@@ -143,6 +160,7 @@ export function useProcessedData(cards, bugs) {
       bugsDone,
       bugsTodo,
       bugStatusDistribution,
+      bugsByAssignee,
       bugPriorityDistribution,
     };
   }, [cards, bugs]);

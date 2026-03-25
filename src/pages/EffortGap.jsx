@@ -61,14 +61,14 @@ function GapCard({ title, subtitle, estimate, actual, gap, overrun, delay = 0 })
       }}
     >
       {subtitle && (
-        <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 2px', fontWeight: 500 }}>{subtitle}</p>
+        <h3
+          className="font-semibold"
+          style={{ fontSize: 16, color: '#0F172A', margin: 0, letterSpacing: '-0.01em' }}
+        >
+          {subtitle}
+        </h3>
       )}
-      <h3
-        className="font-semibold"
-        style={{ fontSize: 16, color: '#0F172A', margin: 0, letterSpacing: '-0.01em' }}
-      >
-        {title}
-      </h3>
+      <p style={{ fontSize: 12, color: '#94A3B8', margin: '2px 0 0', fontWeight: 500 }}>{title}</p>
 
       <div className="flex justify-between mt-4">
         <div>

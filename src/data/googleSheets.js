@@ -101,6 +101,7 @@ export async function fetchBugs() {
     bug_id: r['Key'] ?? r.bug_id ?? '',
     status: r['Status'] ?? r.status ?? '',
     priority: r['Priority'] ?? r.priority ?? '',
+    assignee: r['Assignee'] ?? r.assignee ?? '',
   }));
 }
 

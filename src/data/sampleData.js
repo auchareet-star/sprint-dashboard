@@ -35,16 +35,16 @@ export const rawAll = [
 ];
 
 export const rawBugs = [
-  { bug_id: 'B-001', status: 'Done' },
-  { bug_id: 'B-002', status: 'Done' },
-  { bug_id: 'B-003', status: 'To Do' },
-  { bug_id: 'B-004', status: 'Done' },
-  { bug_id: 'B-005', status: 'To Do' },
-  { bug_id: 'B-006', status: 'Done' },
-  { bug_id: 'B-007', status: 'To Do' },
-  { bug_id: 'B-008', status: 'Done' },
-  { bug_id: 'B-009', status: 'Done' },
-  { bug_id: 'B-010', status: 'To Do' },
-  { bug_id: 'B-011', status: 'Done' },
-  { bug_id: 'B-012', status: 'To Do' },
+  { bug_id: 'B-001', status: 'Done', priority: 'Medium', assignee: 'Alice' },
+  { bug_id: 'B-002', status: 'Done', priority: 'High', assignee: 'Bob' },
+  { bug_id: 'B-003', status: 'To Do', priority: 'Medium', assignee: 'Alice' },
+  { bug_id: 'B-004', status: 'Done', priority: 'Low', assignee: 'Charlie' },
+  { bug_id: 'B-005', status: 'To Do', priority: 'High', assignee: 'Diana' },
+  { bug_id: 'B-006', status: 'Done', priority: 'Medium', assignee: 'Bob' },
+  { bug_id: 'B-007', status: 'To Do', priority: 'Medium', assignee: 'Alice' },
+  { bug_id: 'B-008', status: 'Done', priority: 'Low', assignee: 'Eve' },
+  { bug_id: 'B-009', status: 'Done', priority: 'Medium', assignee: 'Charlie' },
+  { bug_id: 'B-010', status: 'To Do', priority: 'High', assignee: 'Diana' },
+  { bug_id: 'B-011', status: 'Done', priority: 'Medium', assignee: 'Bob' },
+  { bug_id: 'B-012', status: 'To Do', priority: 'Medium', assignee: 'Alice' },
 ];
