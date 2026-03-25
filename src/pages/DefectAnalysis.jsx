@@ -102,6 +102,22 @@ export default function DefectAnalysis({ data, slideRef }) {
               </div>
             </div>
           </div>
+
+          {/* View Bug Cards button */}
+          <button
+            onClick={() => { window.location.hash = 'bugs'; }}
+            className="card cursor-pointer flex items-center gap-3"
+            style={{ padding: '14px 20px', flex: 0.8, border: '1px solid #FECACA', background: '#FFFBFB', transition: 'all 0.15s ease' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#FEF2F2'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#FFFBFB'; }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F43F5E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#F43F5E' }}>View All Bug Cards</div>
+              <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 500 }}>{data.totalBugs} issues</div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto' }}><path d="M9 18l6-6-6-6"/></svg>
+          </button>
         </div>
 
         {/* Bottom row: 3 panels */}

@@ -8,6 +8,7 @@ import TeamPerformance from './pages/TeamPerformance';
 import EffortGap from './pages/EffortGap';
 import DefectAnalysis from './pages/DefectAnalysis';
 import AssigneeView from './pages/AssigneeView';
+import BugListView from './pages/BugListView';
 
 const SLIDES = [
   { id: 'executive', label: 'Executive Summary', Component: ExecutiveSummary },
@@ -22,11 +23,14 @@ function parseHash() {
   if (hash.startsWith('assignee/')) {
     return { view: 'assignee', name: decodeURIComponent(hash.slice('assignee/'.length)) };
   }
+  if (hash === 'bugs') {
+    return { view: 'bugs' };
+  }
   const idx = SLIDES.findIndex((s) => s.id === hash);
   return { view: 'slide', index: idx >= 0 ? idx : 0 };
 }
 
-function AssigneeNav({ assigneeName, assigneeList, goToAssignee, onBack, slideRef }) {
+function AssigneeNav({ assigneeName, assigneeList, goToAssignee, onBack, slideRef, bugCount = 0 }) {
   const [showMenu, setShowMenu] = useState(false);
   return (
     <>
@@ -66,12 +70,68 @@ function AssigneeNav({ assigneeName, assigneeList, goToAssignee, onBack, slideRe
             </>
           )}
         </div>
+        <button
+          onClick={() => { window.location.hash = 'bugs'; }}
+          className="cursor-pointer flex items-center gap-1.5 rounded-lg"
+          style={{ fontSize: 12, fontWeight: 600, padding: '6px 14px', border: '1px solid #FECACA', background: '#FFFFFF', color: '#F43F5E', transition: 'all 0.15s ease' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = '#FEF2F2'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = '#FFFFFF'; }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+          Bug ({bugCount})
+        </button>
       </div>
       <div className="flex items-center gap-3" style={{ position: 'absolute', right: 16 }}>
         <CopyImageButton slideRef={slideRef} />
         <ExportButton slideRef={slideRef} />
       </div>
     </>
+  );
+}
+
+function BugListNav({ assigneeList, goToAssignee, slideRef }) {
+  const [showMenu, setShowMenu] = useState(false);
+  return (
+    <div className="export-hide flex items-center w-full h-full" style={{ position: 'relative' }}>
+      <div className="flex items-center gap-3" style={{ position: 'absolute', left: 16 }}>
+        <button onClick={() => { window.location.hash = 'defects'; }} className="cursor-pointer flex items-center gap-1.5 rounded-lg"
+          style={{ fontSize: 12, fontWeight: 600, padding: '6px 14px', border: '1px solid #E2E8F0', background: '#FFFFFF', color: '#475569' }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = '#F1F5F9'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = '#FFFFFF'; }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          Dashboard
+        </button>
+        <div style={{ position: 'relative' }}>
+          <button onClick={() => setShowMenu((v) => !v)} className="cursor-pointer flex items-center gap-1.5 rounded-lg"
+            style={{ fontSize: 12, fontWeight: 600, padding: '6px 14px', border: '1px solid #E2E8F0', background: showMenu ? '#F1F5F9' : '#FFFFFF', color: '#475569' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4-4v-2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            View Cards
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          {showMenu && (
+            <>
+              <div style={{ position: 'fixed', inset: 0, zIndex: 98 }} onClick={() => setShowMenu(false)} />
+              <div style={{ position: 'absolute', bottom: '100%', left: 0, marginBottom: 6, zIndex: 99, background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.1)', padding: 6, width: 240, maxHeight: 320, overflow: 'auto' }}>
+                {assigneeList.map((a) => (
+                  <button key={a.name} onClick={() => { setShowMenu(false); goToAssignee(a.name); }}
+                    className="cursor-pointer flex items-center justify-between w-full"
+                    style={{ padding: '7px 12px', borderRadius: 6, border: 'none', background: 'transparent', fontSize: 12, fontWeight: 500, color: '#334155', textAlign: 'left' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#F1F5F9'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}>
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</span>
+                    <span style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600, marginLeft: 8, flexShrink: 0 }}>{a.count}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center gap-3" style={{ position: 'absolute', right: 16 }}>
+        <CopyImageButton slideRef={slideRef} />
+        <ExportButton slideRef={slideRef} />
+      </div>
+    </div>
   );
 }
 
@@ -161,15 +221,34 @@ export default function App() {
               goToAssignee={goToAssignee}
               onBack={() => { window.location.hash = 'team'; }}
               slideRef={slideRef}
+              bugCount={bugs.length}
             />
           </div>
         }
       >
         <AssigneeView
           cards={cards}
+          bugs={bugs}
           assigneeName={route.name}
           slideRef={slideRef}
         />
+      </SlideContainer>
+    );
+  }
+
+  // Bug list view
+  if (route.view === 'bugs') {
+    return (
+      <SlideContainer
+        nav={
+          <BugListNav
+            assigneeList={assigneeList}
+            goToAssignee={goToAssignee}
+            slideRef={slideRef}
+          />
+        }
+      >
+        <BugListView bugs={bugs} slideRef={slideRef} />
       </SlideContainer>
     );
   }
@@ -223,6 +302,16 @@ export default function App() {
                 </>
               )}
             </div>
+            <button
+              onClick={() => { window.location.hash = 'bugs'; }}
+              className="cursor-pointer flex items-center gap-1.5 rounded-lg"
+              style={{ fontSize: 12, fontWeight: 600, padding: '6px 14px', border: '1px solid #FECACA', background: '#FFFFFF', color: '#F43F5E', transition: 'all 0.15s ease' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#FEF2F2'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = '#FFFFFF'; }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+              Bug ({bugs.length})
+            </button>
           </div>
 
           <button onClick={goPrev} disabled={currentSlide === 0} className="cursor-pointer flex items-center justify-center" style={{ width: 32, height: 32, borderRadius: 8, border: '1px solid #E2E8F0', background: currentSlide === 0 ? '#F8FAFC' : '#FFFFFF', color: currentSlide === 0 ? '#CBD5E1' : '#334155', fontSize: 16, transition: 'all 0.15s ease' }}>

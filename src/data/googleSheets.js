@@ -102,6 +102,8 @@ export async function fetchBugs() {
   const rows = await fetchSheet('Raw : Bug');
   return rows.map((r) => ({
     bug_id: r['Key'] ?? r.bug_id ?? '',
+    parent: r['parent'] ?? r.parent ?? '',
+    summary: r['Summary'] ?? r.summary ?? '',
     status: r['Status'] ?? r.status ?? '',
     priority: r['Priority'] ?? r.priority ?? '',
     assignee: r['Assignee'] ?? r.assignee ?? '',

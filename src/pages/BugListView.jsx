@@ -23,17 +23,6 @@ const PRIORITY_BADGE = {
   Lowest: { bg: '#F1F5F9', color: '#94A3B8' },
 };
 
-function sortItems(items) {
-  return [...items].sort((a, b) => {
-    const sa = STATUS_ORDER.indexOf(a.status);
-    const sb = STATUS_ORDER.indexOf(b.status);
-    if ((sa >= 0 ? sa : 99) !== (sb >= 0 ? sb : 99)) return (sa >= 0 ? sa : 99) - (sb >= 0 ? sb : 99);
-    const pa = PRIORITY_ORDER.indexOf(a.priority);
-    const pb = PRIORITY_ORDER.indexOf(b.priority);
-    return (pa >= 0 ? pa : 99) - (pb >= 0 ? pb : 99);
-  });
-}
-
 function Badge({ value, colorMap }) {
   const style = colorMap[value] || { bg: '#F1F5F9', color: '#64748B' };
   return (
@@ -51,25 +40,33 @@ const TH = {
 };
 const TD = { padding: '7px 12px', borderBottom: '1px solid #F1F5F9' };
 
-export default function AssigneeView({ cards, assigneeName, slideRef }) {
-  const filtered = useMemo(() => sortItems(cards.filter((c) => c.assignee === assigneeName)), [cards, assigneeName]);
+export default function BugListView({ bugs, slideRef }) {
+  const sorted = useMemo(() => {
+    return [...bugs].sort((a, b) => {
+      const sa = STATUS_ORDER.indexOf(a.status);
+      const sb = STATUS_ORDER.indexOf(b.status);
+      if ((sa >= 0 ? sa : 99) !== (sb >= 0 ? sb : 99)) return (sa >= 0 ? sa : 99) - (sb >= 0 ? sb : 99);
+      const pa = PRIORITY_ORDER.indexOf(a.priority);
+      const pb = PRIORITY_ORDER.indexOf(b.priority);
+      return (pa >= 0 ? pa : 99) - (pb >= 0 ? pb : 99);
+    });
+  }, [bugs]);
 
   const statusCounts = useMemo(() => {
     const counts = {};
-    filtered.forEach((c) => { counts[c.status] = (counts[c.status] || 0) + 1; });
+    bugs.forEach((b) => { counts[b.status] = (counts[b.status] || 0) + 1; });
     return counts;
-  }, [filtered]);
+  }, [bugs]);
 
   return (
     <SlideLayout
-      title={`Card in Sprint : ${assigneeName} (${filtered.length} Cards)`}
+      title={`Card in Sprint : *Bug (${bugs.length} Issues)`}
       subtitle={null}
       slideRef={slideRef}
     >
       <div className="flex flex-col h-full gap-3">
         {/* Status badges */}
         <div className="flex items-center gap-3 flex-none animate-slide-up animate-delay-1" style={{ marginTop: -4 }}>
-          <span style={{ fontSize: 14, color: '#64748B', fontWeight: 500 }}>Status</span>
           <div className="flex gap-2 flex-wrap">
             {Object.entries(statusCounts).map(([status, count]) => (
               <span key={status} style={{
@@ -88,27 +85,26 @@ export default function AssigneeView({ cards, assigneeName, slideRef }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
             <thead>
               <tr>
-                {['#', 'Parent', 'Key', 'Summary', 'Priority', 'Status', 'Est', 'Act'].map((h) => (
-                  <th key={h} style={{ ...TH, textAlign: h === '#' || h === 'Est' || h === 'Act' ? 'center' : 'left' }}>{h}</th>
+                {['#', 'Key', 'Parent', 'Summary', 'Assignee', 'Priority', 'Status'].map((h) => (
+                  <th key={h} style={{ ...TH, textAlign: h === '#' ? 'center' : 'left' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 && (
-                <tr><td colSpan={8} style={{ ...TD, padding: 32, textAlign: 'center', color: '#94A3B8' }}>No cards.</td></tr>
+              {sorted.length === 0 && (
+                <tr><td colSpan={7} style={{ ...TD, padding: 32, textAlign: 'center', color: '#94A3B8' }}>No bugs.</td></tr>
               )}
-              {filtered.map((card, idx) => (
-                <tr key={card.card_id + idx} style={{ transition: 'background 0.1s' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = '#F8FAFC'; }}
+              {sorted.map((bug, idx) => (
+                <tr key={bug.bug_id + idx} style={{ transition: 'background 0.1s' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#FEF2F2'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}>
                   <td style={{ ...TD, textAlign: 'center', color: '#CBD5E1', fontWeight: 500 }}>{idx + 1}</td>
-                  <td style={{ ...TD, color: '#64748B', whiteSpace: 'nowrap' }}>{card.parent || '—'}</td>
-                  <td style={{ ...TD, fontWeight: 600, color: '#1E3A5F', whiteSpace: 'nowrap' }}>{card.card_id}</td>
-                  <td style={{ ...TD, color: '#334155', maxWidth: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{card.summary || '—'}</td>
-                  <td style={TD}><Badge value={card.priority} colorMap={PRIORITY_BADGE} /></td>
-                  <td style={TD}><Badge value={card.status} colorMap={STATUS_BADGE} /></td>
-                  <td style={{ ...TD, color: '#1E3A5F', fontWeight: 600, textAlign: 'center' }}>{card.estimate > 0 ? card.estimate.toFixed(2) : '—'}</td>
-                  <td style={{ ...TD, color: '#F59E0B', fontWeight: 600, textAlign: 'center' }}>{card.actual > 0 ? card.actual.toFixed(2) : '—'}</td>
+                  <td style={{ ...TD, fontWeight: 600, color: '#F43F5E', whiteSpace: 'nowrap' }}>{bug.bug_id}</td>
+                  <td style={{ ...TD, color: '#64748B', whiteSpace: 'nowrap' }}>{bug.parent || '—'}</td>
+                  <td style={{ ...TD, color: '#334155', maxWidth: 450, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{bug.summary || '—'}</td>
+                  <td style={{ ...TD, color: '#1E3A5F', fontWeight: 500, whiteSpace: 'nowrap' }}>{bug.assignee || '—'}</td>
+                  <td style={TD}><Badge value={bug.priority} colorMap={PRIORITY_BADGE} /></td>
+                  <td style={TD}><Badge value={bug.status} colorMap={STATUS_BADGE} /></td>
                 </tr>
               ))}
             </tbody>
