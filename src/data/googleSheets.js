@@ -87,8 +87,11 @@ export async function fetchAllCards() {
   const rows = await fetchSheet('Raw : All');
   return rows.map((r) => ({
     card_id: r['Key'] ?? r.card_id ?? '',
+    parent: r['parent'] ?? r.parent ?? '',
+    summary: r['Summary'] ?? r.summary ?? '',
     type: ISSUE_TYPE_MAP[r['Issue Type']] ?? r.type ?? 'Unplanned',
     status: r['Status'] ?? r.status ?? '',
+    priority: r['Priority'] ?? r.priority ?? '',
     assignee: r['Assignee'] ?? r.assignee ?? '',
     estimate: parseFloat(r['Estimate Man-Days'] ?? r.estimate) || 0,
     actual: parseFloat(r['Actual Man-Days'] ?? r.actual) || 0,

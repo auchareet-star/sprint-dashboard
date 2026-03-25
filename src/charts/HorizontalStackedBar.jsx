@@ -77,7 +77,7 @@ export default function HorizontalStackedBar({ data, width = '100%', height = 40
             dataKey={status}
             stackId="a"
             fill={STATUS_COLORS[status]}
-            barSize={40}
+            barSize={64}
             shape={(props) => (
               <RoundedBarShape {...props} statusKey={status} activeStatuses={activeStatuses} dataEntry={dataWithTotal[props.index]} />
             )}
