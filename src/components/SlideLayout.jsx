@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { toPng, toBlob } from 'html-to-image';
+import { toPng } from 'html-to-image';
 
-const LOGO_URL = 'https://www.ayodiacompany.com/wp-content/uploads/2024/12/Ayodia-Company-Logo-1024x1024.png';
+const LOGO_URL = import.meta.env.BASE_URL + 'ayodia-logo.png';
 
 export default function SlideLayout({ title, subtitle, children, slideRef }) {
   return (
@@ -148,6 +148,8 @@ export function ExportButton({ slideRef }) {
         width: 1920,
         height: 1080,
         pixelRatio: 2,
+        cacheBust: true,
+        imagePlaceholder: '',
       });
       const link = document.createElement('a');
       link.download = 'slide.png';
@@ -188,11 +190,16 @@ export function CopyImageButton({ slideRef }) {
     if (!slideRef.current || state === 'copying') return;
     setState('copying');
     try {
-      const blob = await toBlob(slideRef.current, {
+      // Use toPng then convert to blob — more reliable than toBlob with cross-origin images
+      const dataUrl = await toPng(slideRef.current, {
         width: 1920,
         height: 1080,
         pixelRatio: 2,
+        cacheBust: true,
+        imagePlaceholder: '',
       });
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/png': blob }),
       ]);
