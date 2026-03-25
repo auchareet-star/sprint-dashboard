@@ -44,17 +44,17 @@ export default function DefectAnalysis({ data, slideRef }) {
 
   return (
     <SlideLayout title="Defect Analysis" subtitle="Bug Tracking Overview" slideRef={slideRef}>
-      <div className="flex flex-col gap-5 h-full">
+      <div className="flex flex-col gap-4 h-full">
         {/* Top row: KPI stats */}
-        <div className="flex gap-5 flex-none animate-slide-up animate-delay-1">
+        <div className="flex gap-4 flex-none animate-slide-up animate-delay-1">
           {/* Total */}
           <div
-            className="card flex items-center gap-6"
-            style={{ padding: '20px 32px', flex: 2 }}
+            className="card flex items-center gap-5"
+            style={{ padding: '14px 24px', flex: 2 }}
           >
             <div
               className="font-extrabold"
-              style={{ fontSize: 56, color: '#F43F5E', lineHeight: 1, letterSpacing: '-0.04em' }}
+              style={{ fontSize: 48, color: '#F43F5E', lineHeight: 1, letterSpacing: '-0.04em' }}
             >
               {data.totalBugs}
             </div>
@@ -76,7 +76,7 @@ export default function DefectAnalysis({ data, slideRef }) {
           {/* Resolution Rate */}
           <div
             className="card flex items-center gap-5"
-            style={{ padding: '20px 32px', flex: 1, borderLeft: '3px solid #1E3A5F' }}
+            style={{ padding: '14px 24px', flex: 1, borderLeft: '3px solid #1E3A5F' }}
           >
             <div>
               <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
@@ -104,15 +104,15 @@ export default function DefectAnalysis({ data, slideRef }) {
         </div>
 
         {/* Bottom row: 3 panels */}
-        <div className="flex gap-5 flex-1 min-h-0">
+        <div className="flex gap-4 flex-1 min-h-0">
           {/* By Status */}
           <div
             className="card flex-1 flex flex-col animate-slide-up animate-delay-2"
-            style={{ padding: '20px 24px 12px' }}
+            style={{ padding: '16px 20px 10px' }}
           >
             <h2
               className="font-semibold"
-              style={{ fontSize: 17, color: '#0F172A', margin: '0 0 2px 4px', letterSpacing: '-0.01em' }}
+              style={{ fontSize: 15, color: '#0F172A', margin: '0 0 1px 4px', letterSpacing: '-0.01em' }}
             >
               By Status
             </h2>
@@ -134,11 +134,11 @@ export default function DefectAnalysis({ data, slideRef }) {
           {/* By Priority */}
           <div
             className="card flex-1 flex flex-col animate-slide-up animate-delay-3"
-            style={{ padding: '20px 24px 12px' }}
+            style={{ padding: '16px 20px 10px' }}
           >
             <h2
               className="font-semibold"
-              style={{ fontSize: 17, color: '#0F172A', margin: '0 0 2px 4px', letterSpacing: '-0.01em' }}
+              style={{ fontSize: 15, color: '#0F172A', margin: '0 0 1px 4px', letterSpacing: '-0.01em' }}
             >
               By Priority
             </h2>
@@ -160,11 +160,11 @@ export default function DefectAnalysis({ data, slideRef }) {
           {/* By Assignee */}
           <div
             className="card flex-1 flex flex-col animate-slide-up animate-delay-4"
-            style={{ padding: '20px 24px 12px' }}
+            style={{ padding: '16px 20px 10px' }}
           >
             <h2
               className="font-semibold"
-              style={{ fontSize: 17, color: '#0F172A', margin: '0 0 2px 4px', letterSpacing: '-0.01em' }}
+              style={{ fontSize: 15, color: '#0F172A', margin: '0 0 1px 4px', letterSpacing: '-0.01em' }}
             >
               By Assignee
             </h2>

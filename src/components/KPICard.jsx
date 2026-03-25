@@ -3,14 +3,14 @@ export default function KPICard({ label, value, subtitle, color = '#1E3A5F', lar
     <div
       className={`card flex flex-col justify-center items-center animate-slide-up ${delay ? `animate-delay-${delay}` : ''}`}
       style={{
-        padding: large ? '28px 24px' : '20px 16px',
-        minHeight: large ? 150 : 110,
+        padding: large ? '20px 16px' : '14px 12px',
+        minHeight: large ? 120 : 88,
       }}
     >
       <div
         className="font-extrabold"
         style={{
-          fontSize: large ? 52 : 40,
+          fontSize: large ? 44 : 34,
           color,
           lineHeight: 1,
           letterSpacing: '-0.03em',
@@ -19,9 +19,9 @@ export default function KPICard({ label, value, subtitle, color = '#1E3A5F', lar
         {value}
       </div>
       <div
-        className="font-medium mt-3 text-center"
+        className="font-medium mt-2 text-center"
         style={{
-          fontSize: large ? 16 : 14,
+          fontSize: large ? 14 : 12,
           color: '#64748B',
           letterSpacing: '0.01em',
         }}
@@ -30,9 +30,9 @@ export default function KPICard({ label, value, subtitle, color = '#1E3A5F', lar
       </div>
       {subtitle && (
         <div
-          className="mt-1.5 text-center"
+          className="mt-1 text-center"
           style={{
-            fontSize: 13,
+            fontSize: 11,
             color: '#94A3B8',
             fontWeight: 500,
           }}

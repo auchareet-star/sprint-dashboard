@@ -17,14 +17,14 @@ export default function SlideLayout({ title, subtitle, children, slideRef }) {
       <div style={{ width: 8, background: '#0F172A', flexShrink: 0 }} />
 
       {/* Main content area */}
-      <div className="flex-1 flex flex-col" style={{ padding: '32px 56px 24px' }}>
+      <div className="flex-1 flex flex-col" style={{ padding: '24px 48px 18px' }}>
         {/* Header row */}
-        <div className="flex-none mb-5 animate-slide-up flex items-start justify-between">
+        <div className="flex-none mb-3 animate-slide-up flex items-start justify-between">
           <div>
             <h1
               className="font-extrabold tracking-tight"
               style={{
-                fontSize: 38,
+                fontSize: 32,
                 margin: 0,
                 color: '#0F172A',
                 letterSpacing: '-0.025em',
@@ -35,8 +35,8 @@ export default function SlideLayout({ title, subtitle, children, slideRef }) {
             {/* Yellow-red gradient underline bar */}
             <div
               style={{
-                height: 6,
-                width: 140,
+                height: 5,
+                width: 120,
                 background: 'linear-gradient(90deg, #FACC15 20%, #EF4444 20%)',
                 marginTop: 6,
                 borderRadius: 3,
@@ -47,8 +47,8 @@ export default function SlideLayout({ title, subtitle, children, slideRef }) {
               <p
                 className="mt-2"
                 style={{
-                  fontSize: 17,
-                  color: '#64748B',
+                  fontSize: 15,
+                  color: '#94A3B8',
                   fontWeight: 500,
                   letterSpacing: '-0.01em',
                 }}
@@ -63,8 +63,8 @@ export default function SlideLayout({ title, subtitle, children, slideRef }) {
             src={LOGO_URL}
             alt="Ayodia"
             style={{
-              width: 72,
-              height: 72,
+              width: 60,
+              height: 60,
               objectFit: 'contain',
               flexShrink: 0,
               marginLeft: 24,

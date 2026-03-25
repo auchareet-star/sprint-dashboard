@@ -14,12 +14,11 @@ export function useProcessedData(cards, bugs) {
     const totalEstimate = cards.reduce((s, c) => s + c.estimate, 0);
     const totalActual = cards.reduce((s, c) => s + c.actual, 0);
 
-    // Status counts by type
-    const statusByType = STATUS_ORDER.map((status) => ({
-      status,
-      Planned: planned.filter((c) => c.status === status).length,
-      Unplanned: unplanned.filter((c) => c.status === status).length,
-    }));
+    // Status counts by type — grouped as Planned/Unplanned rows with status breakdown
+    const statusByType = [
+      { type: 'Planned', ...Object.fromEntries(STATUS_ORDER.map((s) => [s, planned.filter((c) => c.status === s).length])) },
+      { type: 'Unplanned', ...Object.fromEntries(STATUS_ORDER.map((s) => [s, unplanned.filter((c) => c.status === s).length])) },
+    ];
 
     // Status distribution (all)
     const statusDistribution = STATUS_ORDER.map((status) => ({

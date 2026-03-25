@@ -4,9 +4,9 @@ import GroupedBarChart from '../charts/GroupedBarChart';
 export default function EffortGap({ data, slideRef }) {
   return (
     <SlideLayout title="Effort Gap Analysis" subtitle="Estimate vs Actual — Grouped by Work Phase" slideRef={slideRef}>
-      <div className="flex gap-7 h-full">
+      <div className="flex gap-4 h-full">
         {/* Left: Summary Cards */}
-        <div className="flex flex-col gap-5 justify-center" style={{ width: 400 }}>
+        <div className="flex flex-col gap-4 justify-center" style={{ width: 380 }}>
           <GapCard
             title="Done / Deploy / Test / Cancel"
             subtitle="Completed work phases"
@@ -30,15 +30,12 @@ export default function EffortGap({ data, slideRef }) {
         {/* Right: Per-assignee chart */}
         <div
           className="card flex-1 flex flex-col animate-slide-up animate-delay-2"
-          style={{ padding: '24px 24px 16px' }}
+          style={{ padding: '16px 20px 12px' }}
         >
-          <h2
-            className="font-semibold"
-            style={{ fontSize: 17, color: '#0F172A', margin: '0 0 2px 4px', letterSpacing: '-0.01em' }}
-          >
+          <h2 className="font-semibold" style={{ fontSize: 15, color: '#0F172A', margin: '0 0 1px 4px', letterSpacing: '-0.01em' }}>
             Effort Gap by Assignee
           </h2>
-          <p style={{ fontSize: 13, color: '#94A3B8', margin: '0 0 4px 4px', fontWeight: 500 }}>
+          <p style={{ fontSize: 12, color: '#94A3B8', margin: '0 0 2px 4px', fontWeight: 500 }}>
             Man-days variance per team member
           </p>
           <div className="flex-1 min-h-0">
@@ -55,7 +52,7 @@ function GapCard({ title, subtitle, estimate, actual, gap, overrun, delay = 0 })
     <div
       className={`card flex flex-col animate-slide-up ${delay ? `animate-delay-${delay}` : ''}`}
       style={{
-        padding: '24px 28px 20px',
+        padding: '18px 22px 16px',
         borderLeft: overrun ? '3px solid #F43F5E' : '3px solid #0D9488',
         background: overrun ? '#FFFBFB' : '#FFFFFF',
       }}
