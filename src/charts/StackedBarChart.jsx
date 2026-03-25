@@ -20,6 +20,64 @@ const tooltipStyle = {
   padding: '10px 14px',
 };
 
+/**
+ * Custom bar shape: rounds the right edge only if this segment is the topmost for that row.
+ */
+function RoundedBarShape({ x, y, width, height, fill, statusKey, activeStatuses, dataEntry }) {
+  if (!width || !height) return null;
+  // Check if this is the topmost segment
+  let isTop = true;
+  const myIdx = activeStatuses.indexOf(statusKey);
+  for (let i = myIdx + 1; i < activeStatuses.length; i++) {
+    if ((dataEntry[activeStatuses[i]] || 0) > 0) {
+      isTop = false;
+      break;
+    }
+  }
+  const r = isTop ? 6 : 0;
+  return (
+    <path
+      d={`M${x},${y} h${width - r} ${r ? `a${r},${r} 0 0 1 ${r},${r}` : `h${r}`} v${height - 2 * r} ${r ? `a${r},${r} 0 0 1 ${-r},${r}` : `v${r}`} h${-(width - r)} z`}
+      fill={fill}
+    />
+  );
+}
+
+/**
+ * Shows total label at the right edge of the full stacked bar.
+ * Only renders on the topmost visible segment.
+ */
+function TotalOnTop({ x, y, width, height, index, statusKey, activeStatuses, data }) {
+  if (!data?.[index]) return null;
+  const row = data[index];
+
+  // Find topmost status with value > 0
+  let topStatus = null;
+  for (let i = activeStatuses.length - 1; i >= 0; i--) {
+    if ((row[activeStatuses[i]] || 0) > 0) {
+      topStatus = activeStatuses[i];
+      break;
+    }
+  }
+  if (statusKey !== topStatus) return null;
+
+  const total = row._total;
+  if (!total) return null;
+
+  return (
+    <text
+      x={x + width + 8}
+      y={y + height / 2}
+      fill="#475569"
+      fontSize={11}
+      fontWeight={700}
+      dominantBaseline="central"
+    >
+      {total}
+    </text>
+  );
+}
+
 export default function StackedBarChart({
   data,
   dataKeyX = 'assignee',
@@ -49,78 +107,56 @@ export default function StackedBarChart({
 
         {isHorizontal ? (
           <>
-            <XAxis
-              dataKey={dataKeyX}
-              tick={{ fontSize: 13, fill: '#334155', fontWeight: 500 }}
-              axisLine={{ stroke: '#E2E8F0' }}
-              tickLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 13, fill: '#94A3B8', fontWeight: 500 }}
-              allowDecimals={false}
-              axisLine={false}
-              tickLine={false}
-            />
+            <XAxis dataKey={dataKeyX} tick={{ fontSize: 13, fill: '#334155', fontWeight: 500 }} axisLine={{ stroke: '#E2E8F0' }} tickLine={false} />
+            <YAxis tick={{ fontSize: 13, fill: '#94A3B8', fontWeight: 500 }} allowDecimals={false} axisLine={false} tickLine={false} />
           </>
         ) : (
           <>
-            <YAxis
-              dataKey={dataKeyX}
-              type="category"
-              tick={{ fontSize: 13, fill: '#334155', fontWeight: 500 }}
-              width={150}
-              axisLine={false}
-              tickLine={false}
-            />
-            <XAxis
-              type="number"
-              tick={{ fontSize: 13, fill: '#94A3B8', fontWeight: 500 }}
-              allowDecimals={false}
-              axisLine={{ stroke: '#E2E8F0' }}
-              tickLine={false}
-            />
+            <YAxis dataKey={dataKeyX} type="category" tick={{ fontSize: 13, fill: '#334155', fontWeight: 500 }} width={150} axisLine={false} tickLine={false} />
+            <XAxis type="number" tick={{ fontSize: 13, fill: '#94A3B8', fontWeight: 500 }} allowDecimals={false} axisLine={{ stroke: '#E2E8F0' }} tickLine={false} />
           </>
         )}
 
         <Tooltip contentStyle={tooltipStyle} />
-        <Legend
-          wrapperStyle={{ fontSize: 13, fontWeight: 600, paddingTop: 12, color: '#475569' }}
-          iconType="circle"
-          iconSize={8}
-        />
-        {activeStatuses.map((status, i) => {
-          const isLast = i === activeStatuses.length - 1;
-          return (
-            <Bar
-              key={status}
-              dataKey={status}
-              stackId="a"
-              fill={STATUS_COLORS[status]}
-              radius={isLast ? (isHorizontal ? [4, 4, 0, 0] : [0, 6, 6, 0]) : [0, 0, 0, 0]}
-              barSize={32}
-            >
-              <LabelList
-                dataKey={status}
-                position="center"
-                fill="#fff"
-                fontSize={11}
-                fontWeight={700}
-                formatter={(v) => (v > 0 ? v : '')}
+        <Legend wrapperStyle={{ fontSize: 13, fontWeight: 600, paddingTop: 12, color: '#475569' }} iconType="circle" iconSize={8} />
+
+        {activeStatuses.map((status) => (
+          <Bar
+            key={status}
+            dataKey={status}
+            stackId="a"
+            fill={STATUS_COLORS[status]}
+            barSize={32}
+            shape={(props) => (
+              <RoundedBarShape
+                {...props}
+                statusKey={status}
+                activeStatuses={activeStatuses}
+                dataEntry={dataWithTotal[props.index]}
               />
-              {isLast && (
-                <LabelList
-                  dataKey="_total"
-                  position={isHorizontal ? 'top' : 'right'}
-                  fill="#475569"
-                  fontSize={11}
-                  fontWeight={700}
-                  offset={8}
-                  formatter={(v) => (v > 0 ? v : '')}
+            )}
+          >
+            <LabelList
+              dataKey={status}
+              position="center"
+              fill="#fff"
+              fontSize={11}
+              fontWeight={700}
+              formatter={(v) => (v > 0 ? v : '')}
+            />
+            <LabelList
+              dataKey={status}
+              content={(props) => (
+                <TotalOnTop
+                  {...props}
+                  statusKey={status}
+                  activeStatuses={activeStatuses}
+                  data={dataWithTotal}
                 />
               )}
-            </Bar>
-          );
-        })}
+            />
+          </Bar>
+        ))}
       </BarChart>
     </ResponsiveContainer>
   );

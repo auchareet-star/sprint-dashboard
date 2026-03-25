@@ -10,7 +10,7 @@ export default function ExecutiveSummary({ data, slideRef }) {
         <div className="flex flex-col gap-5 justify-center" style={{ width: 400 }}>
           <KPICard label="Total Cards" value={data.total} color="#1E3A5F" large delay={1} />
           <div className="grid grid-cols-2 gap-4">
-            <KPICard label="Planned" value={data.plannedCount} color="#1E3A5F" delay={2} />
+            <KPICard label="Planned" value={data.plannedCount} subtitle={`${data.total > 0 ? Math.round((data.plannedCount / data.total) * 100) : 0}% of total`} color="#1E3A5F" delay={2} />
             <KPICard
               label="Unplanned"
               value={data.unplannedCount}
