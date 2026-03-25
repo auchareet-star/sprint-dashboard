@@ -28,7 +28,7 @@ function TotalChart({ data, height = 400 }) {
       <BarChart
         data={data}
         layout="vertical"
-        margin={{ top: 12, right: 40, left: 12, bottom: 12 }}
+        margin={{ top: 12, right: 44, left: 12, bottom: 12 }}
       >
         <CartesianGrid strokeDasharray="none" stroke="#F1F5F9" horizontal={false} />
         <YAxis
@@ -53,10 +53,11 @@ function TotalChart({ data, height = 400 }) {
           iconSize={8}
         />
         <Bar dataKey="Planned" stackId="a" fill={TYPE_COLORS.Planned} barSize={32} radius={[0, 0, 0, 0]}>
-          <LabelList dataKey="Planned" position="center" fill="#fff" fontSize={11} fontWeight={700} />
+          <LabelList dataKey="Planned" position="center" fill="#fff" fontSize={11} fontWeight={700} formatter={(v) => (v > 0 ? v : '')} />
         </Bar>
         <Bar dataKey="Unplanned" stackId="a" fill={TYPE_COLORS.Unplanned} barSize={32} radius={[0, 6, 6, 0]}>
-          <LabelList dataKey="Unplanned" position="center" fill="#fff" fontSize={11} fontWeight={700} />
+          <LabelList dataKey="Unplanned" position="center" fill="#fff" fontSize={11} fontWeight={700} formatter={(v) => (v > 0 ? v : '')} />
+          <LabelList dataKey="Total" position="right" fill="#475569" fontSize={11} fontWeight={700} offset={8} formatter={(v) => (v > 0 ? v : '')} />
         </Bar>
       </BarChart>
     </ResponsiveContainer>

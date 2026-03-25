@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { toPng } from 'html-to-image';
+import { toPng, toBlob } from 'html-to-image';
 
 export default function SlideLayout({ title, subtitle, children, slideRef }) {
   return (
@@ -152,7 +152,64 @@ export function ExportButton({ slideRef }) {
         opacity: exporting ? 0.6 : 1,
       }}
     >
-      {exporting ? 'Exporting...' : 'Export PNG'}
+      {exporting ? 'Exporting...' : 'Save PNG'}
+    </button>
+  );
+}
+
+export function CopyImageButton({ slideRef }) {
+  const [state, setState] = useState('idle'); // idle | copying | copied | error
+
+  const handleCopy = async () => {
+    if (!slideRef.current || state === 'copying') return;
+    setState('copying');
+    try {
+      const blob = await toBlob(slideRef.current, {
+        width: 1920,
+        height: 1080,
+        pixelRatio: 2,
+      });
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob }),
+      ]);
+      setState('copied');
+      setTimeout(() => setState('idle'), 2000);
+    } catch (err) {
+      console.error('Copy image failed:', err);
+      setState('error');
+      setTimeout(() => setState('idle'), 2000);
+    }
+  };
+
+  const label = {
+    idle: 'Copy Image',
+    copying: 'Copying...',
+    copied: 'Copied!',
+    error: 'Failed',
+  }[state];
+
+  return (
+    <button
+      onClick={handleCopy}
+      disabled={state === 'copying'}
+      className="export-hide px-4 py-1.5 rounded-lg cursor-pointer flex items-center gap-1.5"
+      style={{
+        fontSize: 12,
+        fontWeight: 600,
+        background: state === 'copied' ? '#F0FDF4' : '#FFFFFF',
+        color: state === 'copied' ? '#16A34A' : state === 'error' ? '#F43F5E' : '#475569',
+        border: '1px solid #E2E8F0',
+        letterSpacing: '0.02em',
+        transition: 'all 0.2s ease',
+        opacity: state === 'copying' ? 0.6 : 1,
+      }}
+    >
+      {state === 'copied' ? (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      ) : (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      )}
+      {label}
     </button>
   );
 }

@@ -21,9 +21,14 @@ const tooltipStyle = {
 };
 
 export default function HorizontalStackedBar({ data, width = '100%', height = 400 }) {
+  const dataWithTotal = data.map((row) => ({
+    ...row,
+    _total: (row.Planned || 0) + (row.Unplanned || 0),
+  }));
+
   return (
     <ResponsiveContainer width={width} height={height}>
-      <BarChart data={data} layout="vertical" margin={{ top: 12, right: 48, left: 24, bottom: 12 }}>
+      <BarChart data={dataWithTotal} layout="vertical" margin={{ top: 12, right: 48, left: 24, bottom: 12 }}>
         <CartesianGrid strokeDasharray="none" stroke="#F1F5F9" horizontal={false} />
         <XAxis
           type="number"
@@ -46,10 +51,11 @@ export default function HorizontalStackedBar({ data, width = '100%', height = 40
           iconSize={8}
         />
         <Bar dataKey="Planned" stackId="a" fill={TYPE_COLORS.Planned} radius={[0, 0, 0, 0]} barSize={32}>
-          <LabelList dataKey="Planned" position="center" fill="#fff" fontSize={12} fontWeight={700} />
+          <LabelList dataKey="Planned" position="center" fill="#fff" fontSize={12} fontWeight={700} formatter={(v) => (v > 0 ? v : '')} />
         </Bar>
         <Bar dataKey="Unplanned" stackId="a" fill={TYPE_COLORS.Unplanned} radius={[0, 6, 6, 0]} barSize={32}>
-          <LabelList dataKey="Unplanned" position="center" fill="#fff" fontSize={12} fontWeight={700} />
+          <LabelList dataKey="Unplanned" position="center" fill="#fff" fontSize={12} fontWeight={700} formatter={(v) => (v > 0 ? v : '')} />
+          <LabelList dataKey="_total" position="right" fill="#475569" fontSize={11} fontWeight={700} offset={8} formatter={(v) => (v > 0 ? v : '')} />
         </Bar>
       </BarChart>
     </ResponsiveContainer>

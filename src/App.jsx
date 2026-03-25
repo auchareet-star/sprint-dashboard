@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { SlideContainer, ExportButton } from './components/SlideLayout';
+import { SlideContainer, ExportButton, CopyImageButton } from './components/SlideLayout';
 import { useData } from './hooks/useData';
 import { useProcessedData } from './hooks/useProcessedData';
 import ExecutiveSummary from './pages/ExecutiveSummary';
@@ -216,6 +216,7 @@ export default function App() {
                 </>
               )}
             </button>
+            <CopyImageButton slideRef={slideRef} />
             <ExportButton slideRef={slideRef} />
           </div>
         </div>

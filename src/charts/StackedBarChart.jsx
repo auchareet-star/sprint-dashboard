@@ -7,6 +7,7 @@ import {
   Legend,
   ResponsiveContainer,
   CartesianGrid,
+  LabelList,
 } from 'recharts';
 import { STATUS_ORDER, STATUS_COLORS } from '../utils/colors';
 
@@ -32,12 +33,17 @@ export default function StackedBarChart({
 
   const isHorizontal = layout === 'horizontal';
 
+  const dataWithTotal = data.map((row) => {
+    const total = activeStatuses.reduce((s, st) => s + (row[st] || 0), 0);
+    return { ...row, _total: total };
+  });
+
   return (
     <ResponsiveContainer width={width} height={height}>
       <BarChart
-        data={data}
+        data={dataWithTotal}
         layout={isHorizontal ? 'horizontal' : 'vertical'}
-        margin={{ top: 12, right: 24, left: isHorizontal ? 0 : 12, bottom: 12 }}
+        margin={{ top: 12, right: isHorizontal ? 24 : 44, left: isHorizontal ? 0 : 12, bottom: 12 }}
       >
         <CartesianGrid strokeDasharray="none" stroke="#F1F5F9" horizontal={!isHorizontal} vertical={isHorizontal} />
 
@@ -82,20 +88,39 @@ export default function StackedBarChart({
           iconType="circle"
           iconSize={8}
         />
-        {activeStatuses.map((status, i) => (
-          <Bar
-            key={status}
-            dataKey={status}
-            stackId="a"
-            fill={STATUS_COLORS[status]}
-            radius={
-              i === activeStatuses.length - 1
-                ? isHorizontal ? [4, 4, 0, 0] : [0, 6, 6, 0]
-                : [0, 0, 0, 0]
-            }
-            barSize={32}
-          />
-        ))}
+        {activeStatuses.map((status, i) => {
+          const isLast = i === activeStatuses.length - 1;
+          return (
+            <Bar
+              key={status}
+              dataKey={status}
+              stackId="a"
+              fill={STATUS_COLORS[status]}
+              radius={isLast ? (isHorizontal ? [4, 4, 0, 0] : [0, 6, 6, 0]) : [0, 0, 0, 0]}
+              barSize={32}
+            >
+              <LabelList
+                dataKey={status}
+                position="center"
+                fill="#fff"
+                fontSize={11}
+                fontWeight={700}
+                formatter={(v) => (v > 0 ? v : '')}
+              />
+              {isLast && (
+                <LabelList
+                  dataKey="_total"
+                  position={isHorizontal ? 'top' : 'right'}
+                  fill="#475569"
+                  fontSize={11}
+                  fontWeight={700}
+                  offset={8}
+                  formatter={(v) => (v > 0 ? v : '')}
+                />
+              )}
+            </Bar>
+          );
+        })}
       </BarChart>
     </ResponsiveContainer>
   );
