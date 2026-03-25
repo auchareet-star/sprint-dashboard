@@ -1,71 +1,73 @@
 /**
  * Typography scale — single source of truth.
- * Maps to CSS :root vars in index.css.
  *
  * Usage rules:
- *   Page title      → T.pageTitle  (28px)
- *   Section title   → T.section    (15px)
- *   Section desc    → T.desc       (12px)
+ *   Page title      → T.pageTitle  (32px) — unchanged
+ *   Subtitle        → T.subtitle   (15px) — unchanged
+ *   Section title   → T.section    (15px) — unchanged
+ *   Section desc    → T.desc       (14px)
  *   KPI big number  → T.kpiBig / T.kpiSmall
- *   Body            → T.body       (13px)
- *   Label / caption → T.label      (11px)
- *   Micro           → T.micro      (10px)
- *   Chart axis      → T.chartAxis  (13px)
- *   Chart label     → T.chartLabel (11px)
- *   Chart legend    → T.chartLegend(13px)
- *   Badge           → T.badge      (11px)
- *   Table header    → T.tableHead  (11px)
- *   Table cell      → T.tableCell  (12px)
+ *   Body            → T.body       (15px)
+ *   Label / caption → T.label      (13px)
+ *   Micro           → T.micro      (12px)
+ *   Chart axis      → T.chartAxis  (15px)
+ *   Chart label     → T.chartLabel (13px)
+ *   Chart legend    → T.chartLegend(15px)
+ *   Badge           → T.badge      (13px)
+ *   Table header    → T.tableHead  (13px)
+ *   Table cell      → T.tableCell  (14px)
  */
 
 // Font sizes (numbers for inline style)
 export const T = {
-  // Page-level
+  // Page-level (headers — NOT changed)
   pageTitle: 32,
-  subtitle: 15,
+  subtitle: 18,
 
   // Section / card headers
-  section: 15,
-  desc: 12,
+  section: 18,
 
-  // KPI numbers
-  kpiBig: 44,
-  kpiSmall: 34,
-  kpiLabel: 12,
-  kpiSublabel: 11,
-  kpiHero: 48,
+  // Description (+2)
+  desc: 14,
 
-  // Body
-  body: 13,
-  bodyLg: 14,
+  // KPI numbers (+2)
+  kpiBig: 46,
+  kpiSmall: 36,
+  kpiLabel: 14,
+  kpiSublabel: 13,
+  kpiHero: 50,
 
-  // Small / meta
-  label: 11,
-  micro: 10,
-  caption: 9,
+  // Body (+2)
+  body: 15,
+  bodyLg: 16,
 
-  // Chart
-  chartAxis: 13,
-  chartLabel: 11,
-  chartLegend: 13,
-  chartTooltip: 13,
-  chartBarLabel: 12,
+  // Small / meta (+2)
+  label: 13,
+  micro: 12,
+  caption: 11,
 
-  // Table
-  tableHead: 11,
-  tableCell: 12,
+  // Chart (+2)
+  chartAxis: 15,
+  chartLabel: 13,
+  chartLegend: 15,
+  chartTooltip: 15,
+  chartBarLabel: 14,
 
-  // Badge
-  badge: 11,
+  // Table (+2)
+  tableHead: 13,
+  tableCell: 14,
 
-  // Metric
-  metricValue: 24,
-  metricLg: 28,
-  metricXl: 40,
+  // Badge (+2)
+  badge: 13,
 
-  // Nav / UI
-  nav: 12,
-  button: 12,
+  // Metric (+2)
+  metricValue: 26,
+  metricLg: 30,
+  metricXl: 42,
+
+  // Nav / UI (+2)
+  nav: 14,
+  button: 14,
 };
 
 // Shared tooltip style for recharts

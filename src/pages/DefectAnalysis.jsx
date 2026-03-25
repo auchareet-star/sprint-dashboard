@@ -183,7 +183,7 @@ export default function DefectAnalysis({ data, slideRef }) {
                   <YAxis
                     dataKey="assignee"
                     type="category"
-                    tick={{ fontSize: 13, fill: '#334155', fontWeight: 500 }}
+                    tick={{ fontSize: 15, fill: '#334155', fontWeight: 500 }}
                     width={120}
                     axisLine={false}
                     tickLine={false}
