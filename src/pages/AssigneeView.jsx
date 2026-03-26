@@ -23,8 +23,19 @@ const PRIORITY_BADGE = {
   Lowest: { bg: '#F1F5F9', color: '#94A3B8' },
 };
 
+const TYPE_BADGE = {
+  Story: { bg: '#EEF2FF', color: '#1E3A5F' },
+  Task: { bg: '#FFF7ED', color: '#D97706' },
+  Bug: { bg: '#FEF2F2', color: '#F43F5E' },
+};
+
 function sortItems(items) {
   return [...items].sort((a, b) => {
+    // Sort by Issue Type: Bug first, then Story, then Task
+    const typeOrder = { Story: 0, Task: 1, Bug: 2 };
+    const ta = typeOrder[a.issueType] ?? 99;
+    const tb = typeOrder[b.issueType] ?? 99;
+    if (ta !== tb) return ta - tb;
     const sa = STATUS_ORDER.indexOf(a.status);
     const sb = STATUS_ORDER.indexOf(b.status);
     if ((sa >= 0 ? sa : 99) !== (sb >= 0 ? sb : 99)) return (sa >= 0 ? sa : 99) - (sb >= 0 ? sb : 99);
@@ -51,18 +62,50 @@ const TH = {
 };
 const TD = { padding: '7px 12px', borderBottom: '1px solid #F1F5F9' };
 
-export default function AssigneeView({ cards, assigneeName, slideRef }) {
-  const filtered = useMemo(() => sortItems(cards.filter((c) => c.assignee === assigneeName)), [cards, assigneeName]);
+export default function AssigneeView({ cards, bugs = [], assigneeName, slideRef }) {
+  // Merge cards + bugs into one list with issueType
+  const allItems = useMemo(() => {
+    const cardItems = cards
+      .filter((c) => c.assignee === assigneeName)
+      .map((c) => ({
+        key: c.card_id,
+        parent: c.parent,
+        summary: c.summary,
+        issueType: c.type === 'Planned' ? 'Story' : 'Task',
+        priority: c.priority,
+        status: c.status,
+        estimate: c.estimate,
+        actual: c.actual,
+      }));
+
+    const bugItems = bugs
+      .filter((b) => b.assignee === assigneeName)
+      .map((b) => ({
+        key: b.bug_id,
+        parent: b.parent,
+        summary: b.summary,
+        issueType: 'Bug',
+        priority: b.priority,
+        status: b.status,
+        estimate: 0,
+        actual: 0,
+      }));
+
+    return sortItems([...cardItems, ...bugItems]);
+  }, [cards, bugs, assigneeName]);
+
+  const cardCount = allItems.filter((i) => i.issueType !== 'Bug').length;
+  const bugCount = allItems.filter((i) => i.issueType === 'Bug').length;
 
   const statusCounts = useMemo(() => {
     const counts = {};
-    filtered.forEach((c) => { counts[c.status] = (counts[c.status] || 0) + 1; });
+    allItems.forEach((c) => { counts[c.status] = (counts[c.status] || 0) + 1; });
     return counts;
-  }, [filtered]);
+  }, [allItems]);
 
   return (
     <SlideLayout
-      title={`Card in Sprint : ${assigneeName} (${filtered.length} Cards)`}
+      title={`Card in Sprint : ${assigneeName} (${cardCount} Cards, ${bugCount} Bugs)`}
       subtitle={null}
       slideRef={slideRef}
     >
@@ -88,27 +131,28 @@ export default function AssigneeView({ cards, assigneeName, slideRef }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 15 }}>
             <thead>
               <tr>
-                {['#', 'Parent', 'Key', 'Summary', 'Priority', 'Status', 'Est', 'Act'].map((h) => (
+                {['#', 'Issue Type', 'Parent', 'Key', 'Summary', 'Priority', 'Status', 'Est', 'Act'].map((h) => (
                   <th key={h} style={{ ...TH, textAlign: h === '#' || h === 'Est' || h === 'Act' ? 'center' : 'left' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 && (
-                <tr><td colSpan={8} style={{ ...TD, padding: 32, textAlign: 'center', color: '#94A3B8' }}>No cards.</td></tr>
+              {allItems.length === 0 && (
+                <tr><td colSpan={9} style={{ ...TD, padding: 32, textAlign: 'center', color: '#94A3B8' }}>No items.</td></tr>
               )}
-              {filtered.map((card, idx) => (
-                <tr key={card.card_id + idx} style={{ transition: 'background 0.1s' }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = '#F8FAFC'; }}
+              {allItems.map((item, idx) => (
+                <tr key={item.key + idx} style={{ transition: 'background 0.1s' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = item.issueType === 'Bug' ? '#FEF2F2' : '#F8FAFC'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}>
                   <td style={{ ...TD, textAlign: 'center', color: '#CBD5E1', fontWeight: 500 }}>{idx + 1}</td>
-                  <td style={{ ...TD, color: '#64748B', whiteSpace: 'nowrap' }}>{card.parent || '—'}</td>
-                  <td style={{ ...TD, fontWeight: 600, color: '#1E3A5F', whiteSpace: 'nowrap' }}>{card.card_id}</td>
-                  <td style={{ ...TD, color: '#334155', maxWidth: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{card.summary || '—'}</td>
-                  <td style={TD}><Badge value={card.priority} colorMap={PRIORITY_BADGE} /></td>
-                  <td style={TD}><Badge value={card.status} colorMap={STATUS_BADGE} /></td>
-                  <td style={{ ...TD, color: '#1E3A5F', fontWeight: 600, textAlign: 'center' }}>{card.estimate > 0 ? card.estimate.toFixed(2) : '—'}</td>
-                  <td style={{ ...TD, color: '#F59E0B', fontWeight: 600, textAlign: 'center' }}>{card.actual > 0 ? card.actual.toFixed(2) : '—'}</td>
+                  <td style={TD}><Badge value={item.issueType} colorMap={TYPE_BADGE} /></td>
+                  <td style={{ ...TD, color: '#64748B', whiteSpace: 'nowrap' }}>{item.parent || '—'}</td>
+                  <td style={{ ...TD, fontWeight: 600, color: item.issueType === 'Bug' ? '#F43F5E' : '#1E3A5F', whiteSpace: 'nowrap' }}>{item.key}</td>
+                  <td style={{ ...TD, color: '#334155', maxWidth: 450, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.summary || '—'}</td>
+                  <td style={TD}><Badge value={item.priority} colorMap={PRIORITY_BADGE} /></td>
+                  <td style={TD}><Badge value={item.status} colorMap={STATUS_BADGE} /></td>
+                  <td style={{ ...TD, color: '#1E3A5F', fontWeight: 600, textAlign: 'center' }}>{item.estimate > 0 ? item.estimate.toFixed(2) : '—'}</td>
+                  <td style={{ ...TD, color: '#F59E0B', fontWeight: 600, textAlign: 'center' }}>{item.actual > 0 ? item.actual.toFixed(2) : '—'}</td>
                 </tr>
               ))}
             </tbody>
