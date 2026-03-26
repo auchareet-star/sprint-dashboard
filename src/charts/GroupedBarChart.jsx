@@ -6,6 +6,28 @@ import { T, tooltipStyle, axisTickPrimary, axisTickSecondary, legendStyle } from
 
 const fmt2 = (v) => (typeof v === 'number' ? v.toFixed(2) : v);
 
+function WrapTick({ x, y, payload }) {
+  const text = payload.value || '';
+  let lines;
+  if (text.length <= 16) {
+    lines = [text];
+  } else {
+    const mid = Math.floor(text.length / 2);
+    let best = -1;
+    for (let i = 0; i < text.length; i++) {
+      if (text[i] === ' ' && (best === -1 || Math.abs(i - mid) < Math.abs(best - mid))) best = i;
+    }
+    lines = best > 0 ? [text.slice(0, best), text.slice(best + 1)] : [text];
+  }
+  const lh = 15;
+  const topY = y - ((lines.length - 1) * lh) / 2;
+  return (
+    <text x={x} textAnchor="end" fontSize={T.chartAxis} fontWeight={500} fill="#334155">
+      {lines.map((l, i) => <tspan key={i} x={x} y={topY + i * lh}>{l}</tspan>)}
+    </text>
+  );
+}
+
 export default function GroupedBarChart({ data, dataKeyX = 'status', width = '100%', height = 400, layout = 'vertical' }) {
   const isHorizontal = layout === 'horizontal';
   return (
@@ -19,7 +41,7 @@ export default function GroupedBarChart({ data, dataKeyX = 'status', width = '10
           </>
         ) : (
           <>
-            <YAxis dataKey={dataKeyX} type="category" tick={axisTickPrimary} width={150} axisLine={false} tickLine={false} />
+            <YAxis dataKey={dataKeyX} type="category" tick={<WrapTick />} width={150} axisLine={false} tickLine={false} />
             <XAxis type="number" tick={axisTickSecondary} axisLine={{ stroke: '#E2E8F0' }} tickLine={false} />
           </>
         )}

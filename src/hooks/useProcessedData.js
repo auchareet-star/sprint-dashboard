@@ -127,6 +127,20 @@ export function useProcessedData(cards, bugs) {
       .filter((d) => d.value > 0)
       .sort((a, b) => b.value - a.value);
 
+    // Bug Status x Priority breakdown
+    const PRIORITY_LIST = ['Highest', 'High', 'Medium', 'Low', 'Lowest'];
+    const bugStatusByPriority = STATUS_ORDER
+      .map((status) => {
+        const row = { status };
+        const statusBugs = bugs.filter((b) => b.status === status);
+        PRIORITY_LIST.forEach((p) => {
+          row[p] = statusBugs.filter((b) => b.priority === p).length;
+        });
+        row._total = statusBugs.length;
+        return row;
+      })
+      .filter((r) => r._total > 0);
+
     // Bugs by assignee
     const bugAssigneeCounts = {};
     bugs.forEach((b) => {
@@ -161,6 +175,7 @@ export function useProcessedData(cards, bugs) {
       bugStatusDistribution,
       bugsByAssignee,
       bugPriorityDistribution,
+      bugStatusByPriority,
     };
   }, [cards, bugs]);
 }

@@ -7,21 +7,11 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  Legend,
   ResponsiveContainer,
   CartesianGrid,
   LabelList,
 } from 'recharts';
-
-const BUG_STATUS_COLORS = {
-  Done: '#1E3A5F',
-  'To Do': '#94A3B8',
-  'Wait for Deploy': '#6366F1',
-  'Waiting for test': '#8B5CF6',
-  'Waiting for Test': '#8B5CF6',
-  'Test Failed': '#F59E0B',
-  Cancel: '#F43F5E',
-  'In Progress': '#0D9488',
-};
 
 const BUG_PRIORITY_COLORS = {
   Highest: '#991B1B',
@@ -39,6 +29,26 @@ const tooltipStyle = {
   fontWeight: 500,
   padding: '10px 14px',
 };
+
+const PRIO_KEYS = ['Highest', 'High', 'Medium', 'Low', 'Lowest'];
+
+function PrioTotalOnTop({ x, y, width, height, index, prioKey, data }) {
+  if (!data?.[index]) return null;
+  const row = data[index];
+  // Find topmost priority with value > 0
+  let topKey = null;
+  for (let i = PRIO_KEYS.length - 1; i >= 0; i--) {
+    if ((row[PRIO_KEYS[i]] || 0) > 0) { topKey = PRIO_KEYS[i]; break; }
+  }
+  if (prioKey !== topKey) return null;
+  const total = row._total;
+  if (!total) return null;
+  return (
+    <text x={x + width + 8} y={y + height / 2} fill="#475569" fontSize={T.chartLabel} fontWeight={700} dominantBaseline="central">
+      {total}
+    </text>
+  );
+}
 
 export default function DefectAnalysis({ data, slideRef }) {
   const resolutionRate = data.totalBugs > 0 ? Math.round((data.bugsDone / data.totalBugs) * 100) : 0;
@@ -122,7 +132,7 @@ export default function DefectAnalysis({ data, slideRef }) {
 
         {/* Bottom row: 3 panels */}
         <div className="flex gap-4 flex-1 min-h-0">
-          {/* By Status */}
+          {/* Status x Priority */}
           <div
             className="card flex-1 flex flex-col animate-slide-up animate-delay-2"
             style={{ padding: '16px 20px 10px' }}
@@ -131,20 +141,44 @@ export default function DefectAnalysis({ data, slideRef }) {
               className="font-semibold"
               style={{ fontSize: T.section, color: '#0F172A', margin: '0 0 1px 4px', letterSpacing: '-0.01em' }}
             >
-              By Status
+              Status x Priority
             </h2>
             <p style={{ fontSize: T.body, color: '#94A3B8', margin: '0 0 0 4px', fontWeight: 500 }}>
-              Current bug resolution state
+              Priority breakdown per status
             </p>
-            <div className="flex-1 min-h-0 flex items-center justify-center">
-              <DonutChart
-                data={data.bugStatusDistribution}
-                colorMap={BUG_STATUS_COLORS}
-                height="100%"
-                innerRadius={75}
-                outerRadius={135}
-                centerLabel="Bugs"
-              />
+            <div className="flex-1 min-h-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={data.bugStatusByPriority || []}
+                  layout="vertical"
+                  margin={{ top: 8, right: 36, left: 8, bottom: 8 }}
+                >
+                  <CartesianGrid strokeDasharray="none" stroke="#F1F5F9" horizontal={false} />
+                  <YAxis
+                    dataKey="status"
+                    type="category"
+                    tick={{ fontSize: T.chartAxis, fill: '#334155', fontWeight: 500 }}
+                    width={130}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <XAxis
+                    type="number"
+                    tick={{ fontSize: T.chartAxis, fill: '#94A3B8', fontWeight: 500 }}
+                    allowDecimals={false}
+                    axisLine={{ stroke: '#E2E8F0' }}
+                    tickLine={false}
+                  />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Legend wrapperStyle={{ fontSize: T.chartLegend, fontWeight: 600, paddingTop: 8, color: '#475569' }} iconType="circle" iconSize={8} />
+                  {PRIO_KEYS.map((pk) => (
+                    <Bar key={pk} dataKey={pk} stackId="a" fill={BUG_PRIORITY_COLORS[pk] || '#94A3B8'} barSize={24}>
+                      <LabelList dataKey={pk} position="center" fill="#fff" fontSize={T.chartLabel} fontWeight={700} formatter={(v) => (v > 0 ? v : '')} />
+                      <LabelList dataKey={pk} content={(props) => <PrioTotalOnTop {...props} prioKey={pk} data={data.bugStatusByPriority || []} />} />
+                    </Bar>
+                  ))}
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
