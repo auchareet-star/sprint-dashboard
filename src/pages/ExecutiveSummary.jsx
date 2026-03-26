@@ -118,8 +118,8 @@ function InsightRow({ label, value, color, bar }) {
   return (
     <div>
       <div className="flex items-center justify-between" style={{ marginBottom: 3 }}>
-        <span style={{ fontSize: 12, color: '#64748B', fontWeight: 500 }}>{label}</span>
-        <span className="font-bold" style={{ fontSize: 14, color, letterSpacing: '-0.02em' }}>{value}</span>
+        <span style={{ fontSize: 15, color: '#64748B', fontWeight: 500 }}>{label}</span>
+        <span className="font-bold" style={{ fontSize: 15, color, letterSpacing: '-0.02em' }}>{value}</span>
       </div>
       {bar != null && (
         <div style={{ width: '100%', height: 4, background: '#F1F5F9', borderRadius: 2 }}>

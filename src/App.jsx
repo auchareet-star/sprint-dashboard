@@ -7,10 +7,12 @@ import EffortOverview from './pages/EffortOverview';
 import TeamPerformance from './pages/TeamPerformance';
 import EffortGap from './pages/EffortGap';
 import DefectAnalysis from './pages/DefectAnalysis';
+import TeamMembers from './pages/TeamMembers';
 import AssigneeView from './pages/AssigneeView';
 import BugListView from './pages/BugListView';
 
 const SLIDES = [
+  { id: 'members', label: 'Team Members', Component: TeamMembers },
   { id: 'executive', label: 'Executive Summary', Component: ExecutiveSummary },
   { id: 'effort', label: 'Effort Overview', Component: EffortOverview },
   { id: 'team', label: 'Team Performance', Component: TeamPerformance },
@@ -139,8 +141,9 @@ export default function App() {
   const [route, setRoute] = useState(parseHash);
   const [showAssigneeMenu, setShowAssigneeMenu] = useState(false);
   const slideRef = useRef(null);
-  const { cards, bugs, loading, source } = useData();
-  const data = useProcessedData(cards, bugs);
+  const { cards, bugs, team, loading, source } = useData();
+  const processed = useProcessedData(cards, bugs);
+  const data = { ...processed, team };
 
   // Sync hash
   useEffect(() => {

@@ -110,6 +110,16 @@ export async function fetchBugs() {
   }));
 }
 
+export async function fetchTeamMembers() {
+  const rows = await fetchSheet('Team members');
+  return rows.map((r) => ({
+    name: r['Name'] ?? r.name ?? '',
+    role: r['Role'] ?? r.role ?? '',
+    estimate: parseFloat(r['Effort (Est)'] ?? r.estimate) || 0,
+    actual: parseFloat(r['Effort (Act)'] ?? r.actual) || 0,
+  })).filter((m) => m.name);
+}
+
 export function isGoogleSheetsConfigured() {
   return Boolean(SHEET_ID);
 }

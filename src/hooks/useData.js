@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { rawAll, rawBugs } from '../data/sampleData';
-import { fetchAllCards, fetchBugs, isGoogleSheetsConfigured } from '../data/googleSheets';
+import { fetchAllCards, fetchBugs, fetchTeamMembers, isGoogleSheetsConfigured } from '../data/googleSheets';
 
 export function useData() {
   const [cards, setCards] = useState(rawAll);
   const [bugs, setBugs] = useState(rawBugs);
+  const [team, setTeam] = useState([]);
   const [loading, setLoading] = useState(false);
   const [source, setSource] = useState('sample');
 
@@ -22,8 +23,12 @@ export function useData() {
       .then((b) => { console.log('Bugs loaded:', b.length); setBugs(b); })
       .catch((err) => console.warn('fetchBugs failed:', err));
 
-    Promise.all([loadCards, loadBugs]).finally(() => setLoading(false));
+    const loadTeam = fetchTeamMembers()
+      .then((t) => { console.log('Team loaded:', t.length); setTeam(t); })
+      .catch((err) => console.warn('fetchTeamMembers failed:', err));
+
+    Promise.all([loadCards, loadBugs, loadTeam]).finally(() => setLoading(false));
   }, []);
 
-  return { cards, bugs, loading, source };
+  return { cards, bugs, team, loading, source };
 }
