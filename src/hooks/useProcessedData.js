@@ -26,15 +26,11 @@ export function useProcessedData(cards, bugs) {
       value: cards.filter((c) => c.status === status).length,
     })).filter((d) => d.value > 0);
 
-    // Effort by status
-    const effortByStatus = STATUS_ORDER.map((status) => {
-      const group = cards.filter((c) => c.status === status);
-      return {
-        status,
-        Estimate: group.reduce((s, c) => s + c.estimate, 0),
-        Actual: group.reduce((s, c) => s + c.actual, 0),
-      };
-    }).filter((d) => d.Estimate > 0 || d.Actual > 0);
+    // Effort by status — grouped as Estimate/Actual rows with status breakdown
+    const effortByStatus = [
+      { type: 'Estimate', ...Object.fromEntries(STATUS_ORDER.map((s) => [s, cards.filter((c) => c.status === s).reduce((sum, c) => sum + c.estimate, 0)])) },
+      { type: 'Actual', ...Object.fromEntries(STATUS_ORDER.map((s) => [s, cards.filter((c) => c.status === s).reduce((sum, c) => sum + c.actual, 0)])) },
+    ];
 
     // Team performance - all assignees (sorted by total cards descending)
     const assigneeCounts = {};

@@ -1,7 +1,10 @@
-import { T } from '../utils/typography';
+import { T, tooltipStyle, axisTickSecondary, legendStyle } from '../utils/typography';
 import SlideLayout from '../components/SlideLayout';
-import GroupedBarChart from '../charts/GroupedBarChart';
 import DonutChart from '../charts/DonutChart';
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, LabelList,
+} from 'recharts';
+import { STATUS_ORDER, STATUS_COLORS } from '../utils/colors';
 
 export default function EffortOverview({ data, slideRef }) {
   const variance = data.totalActual - data.totalEstimate;
@@ -37,7 +40,7 @@ export default function EffortOverview({ data, slideRef }) {
               Man-days comparison by work status
             </p>
             <div className="flex-1 min-h-0">
-              <GroupedBarChart data={data.effortByStatus} height="100%" />
+              <EffortByStatusChart data={data.effortByStatus} />
             </div>
           </div>
 
@@ -73,12 +76,58 @@ function SummaryPill({ label, value, unit, color, highlight = false }) {
       }}
     >
       <div>
-        <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase' }}>{label}</div>
-        {unit && <div style={{ fontSize: 10, color: '#CBD5E1', fontWeight: 500 }}>{unit}</div>}
+        <div style={{ fontSize: 15, color: '#94A3B8', fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase' }}>{label}</div>
+        {unit && <div style={{ fontSize: 13, color: '#CBD5E1', fontWeight: 500 }}>{unit}</div>}
       </div>
-      <span className="font-extrabold" style={{ fontSize: 22, color, letterSpacing: '-0.02em' }}>
+      <span className="font-extrabold" style={{ fontSize: 28, color, letterSpacing: '-0.02em' }}>
         {value}
       </span>
     </div>
+  );
+}
+
+const fmt2 = (v) => (typeof v === 'number' ? v.toFixed(2) : v);
+
+function TotalOnTopVertical({ x, y, width, height, index, statusKey, activeStatuses, data }) {
+  if (!data?.[index]) return null;
+  const row = data[index];
+  // Only render on the FIRST status in the list (Done = bottom of stack, always has largest segment)
+  if (statusKey !== activeStatuses[0]) return null;
+  const total = activeStatuses.reduce((s, st) => s + (row[st] || 0), 0);
+  if (!total) return null;
+  // y + height = bottom of this segment (axis baseline)
+  // Total bar height proportional: this segment's value / total * full height
+  // Full stack visual height = height * (total / row[statusKey])
+  const thisVal = row[statusKey] || 1;
+  const fullStackHeight = height * (total / thisVal);
+  const topY = y + height - fullStackHeight;
+  return (
+    <text x={x + width / 2} y={topY - 12} fill="#475569" fontSize={18} fontWeight={700} textAnchor="middle">
+      {fmt2(total)}
+    </text>
+  );
+}
+
+function EffortByStatusChart({ data }) {
+  const activeStatuses = STATUS_ORDER.filter((s) => data.some((row) => (row[s] || 0) > 0));
+
+  return (
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={data} margin={{ top: 56, right: 20, left: 20, bottom: 12 }}>
+        <CartesianGrid strokeDasharray="none" stroke="#F1F5F9" vertical={false} />
+        <XAxis dataKey="type" tick={{ fontSize: T.section, fill: '#334155', fontWeight: 600 }} axisLine={{ stroke: '#E2E8F0' }} tickLine={false} />
+        <YAxis tick={axisTickSecondary} axisLine={false} tickLine={false} />
+        <Tooltip contentStyle={tooltipStyle} formatter={(value) => fmt2(value)} />
+        <Legend wrapperStyle={legendStyle} iconType="circle" iconSize={8} />
+        {activeStatuses.map((status) => (
+          <Bar key={status} dataKey={status} stackId="a" fill={STATUS_COLORS[status]} barSize={120}>
+            <LabelList dataKey={status} position="center" fill="#fff" fontSize={T.chartLabel} fontWeight={700}
+              formatter={(v) => (v > 0 ? fmt2(v) : '')} />
+            <LabelList dataKey={status}
+              content={(props) => <TotalOnTopVertical {...props} statusKey={status} activeStatuses={activeStatuses} data={data} />} />
+          </Bar>
+        ))}
+      </BarChart>
+    </ResponsiveContainer>
   );
 }
