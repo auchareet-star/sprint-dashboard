@@ -108,6 +108,20 @@ function TotalOnTopVertical({ x, y, width, height, index, statusKey, activeStatu
   );
 }
 
+function RoundedVerticalBar({ x, y, width, height, fill, statusKey, activeStatuses, dataEntry }) {
+  if (!width || !height) return null;
+  let isTop = true;
+  const myIdx = activeStatuses.indexOf(statusKey);
+  for (let i = myIdx + 1; i < activeStatuses.length; i++) {
+    if ((dataEntry[activeStatuses[i]] || 0) > 0) { isTop = false; break; }
+  }
+  const r = isTop ? 6 : 0;
+  // Vertical bar: round top-left and top-right
+  return (
+    <path d={`M${x},${y + (r ? r : 0)} ${r ? `a${r},${r} 0 0 1 ${r},${-r}` : `v0`} h${width - 2 * r} ${r ? `a${r},${r} 0 0 1 ${r},${r}` : `h0`} v${height - r} h${-width} z`} fill={fill} />
+  );
+}
+
 function EffortByStatusChart({ data }) {
   const activeStatuses = STATUS_ORDER.filter((s) => data.some((row) => (row[s] || 0) > 0));
 
@@ -120,7 +134,9 @@ function EffortByStatusChart({ data }) {
         <Tooltip contentStyle={tooltipStyle} formatter={(value) => fmt2(value)} />
         <Legend wrapperStyle={legendStyle} iconType="circle" iconSize={8} />
         {activeStatuses.map((status) => (
-          <Bar key={status} dataKey={status} stackId="a" fill={STATUS_COLORS[status]} barSize={120}>
+          <Bar key={status} dataKey={status} stackId="a" fill={STATUS_COLORS[status]} barSize={120}
+            shape={(props) => <RoundedVerticalBar {...props} statusKey={status} activeStatuses={activeStatuses} dataEntry={data[props.index] || {}} />}
+          >
             <LabelList dataKey={status} position="center" fill="#fff" fontSize={T.chartLabel} fontWeight={700}
               formatter={(v) => (v > 0 ? fmt2(v) : '')} />
             <LabelList dataKey={status}
