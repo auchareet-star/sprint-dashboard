@@ -1,3 +1,4 @@
+import { T } from '../utils/typography';
 import SlideLayout from '../components/SlideLayout';
 
 const ROLE_COLORS = {
@@ -64,18 +65,18 @@ function MemberCard({ member }) {
           flexShrink: 0,
         }}
       >
-        <span style={{ fontSize: 22, fontWeight: 700, color: roleColor }}>{initials}</span>
+        <span style={{ fontSize: T.section, fontWeight: 700, color: roleColor }}>{initials}</span>
       </div>
 
       {/* Info */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 19, fontWeight: 700, color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div style={{ fontSize: T.bodyLg, fontWeight: 700, color: '#0F172A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           Name: {name}
         </div>
-        <div style={{ fontSize: 17, color: '#64748B', fontWeight: 500, marginTop: 2 }}>
+        <div style={{ fontSize: T.body, color: '#64748B', fontWeight: 500, marginTop: 2 }}>
           Role: {role}
         </div>
-        <div style={{ fontSize: 17, color: '#334155', fontWeight: 600, marginTop: 3 }}>
+        <div style={{ fontSize: T.body, color: '#334155', fontWeight: 600, marginTop: 3 }}>
           Effort: {estLabel} ({actLabel})
         </div>
       </div>

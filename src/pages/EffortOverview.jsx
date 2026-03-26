@@ -76,10 +76,10 @@ function SummaryPill({ label, value, unit, color, highlight = false }) {
       }}
     >
       <div>
-        <div style={{ fontSize: 15, color: '#94A3B8', fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase' }}>{label}</div>
-        {unit && <div style={{ fontSize: 13, color: '#CBD5E1', fontWeight: 500 }}>{unit}</div>}
+        <div style={{ fontSize: T.label, color: '#94A3B8', fontWeight: 600, letterSpacing: '0.03em', textTransform: 'uppercase' }}>{label}</div>
+        {unit && <div style={{ fontSize: T.caption, color: '#CBD5E1', fontWeight: 500 }}>{unit}</div>}
       </div>
-      <span className="font-extrabold" style={{ fontSize: 28, color, letterSpacing: '-0.02em' }}>
+      <span className="font-extrabold" style={{ fontSize: T.metricValue, color, letterSpacing: '-0.02em' }}>
         {value}
       </span>
     </div>

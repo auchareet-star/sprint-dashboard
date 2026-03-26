@@ -80,10 +80,10 @@ export default function ExecutiveSummary({ data, slideRef }) {
                     padding: '10px 14px',
                   }}
                 >
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#F43F5E', marginBottom: 2 }}>
+                  <div style={{ fontSize: T.micro, fontWeight: 700, color: '#F43F5E', marginBottom: 2 }}>
                     Risk Alert
                   </div>
-                  <div style={{ fontSize: 11, color: '#64748B', lineHeight: 1.5 }}>
+                  <div style={{ fontSize: T.caption, color: '#64748B', lineHeight: 1.5 }}>
                     Unplanned work exceeds 30% ({data.pctUnplanned}%). Review sprint scope and capacity planning.
                   </div>
                 </div>
@@ -98,10 +98,10 @@ export default function ExecutiveSummary({ data, slideRef }) {
                     padding: '10px 14px',
                   }}
                 >
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#16A34A', marginBottom: 2 }}>
+                  <div style={{ fontSize: T.micro, fontWeight: 700, color: '#16A34A', marginBottom: 2 }}>
                     On Track
                   </div>
-                  <div style={{ fontSize: 11, color: '#64748B', lineHeight: 1.5 }}>
+                  <div style={{ fontSize: T.caption, color: '#64748B', lineHeight: 1.5 }}>
                     Unplanned work is within acceptable range ({data.pctUnplanned}%).
                   </div>
                 </div>
@@ -118,8 +118,8 @@ function InsightRow({ label, value, color, bar }) {
   return (
     <div>
       <div className="flex items-center justify-between" style={{ marginBottom: 3 }}>
-        <span style={{ fontSize: 15, color: '#64748B', fontWeight: 500 }}>{label}</span>
-        <span className="font-bold" style={{ fontSize: 15, color, letterSpacing: '-0.02em' }}>{value}</span>
+        <span style={{ fontSize: T.label, color: '#64748B', fontWeight: 500 }}>{label}</span>
+        <span className="font-bold" style={{ fontSize: T.label, color, letterSpacing: '-0.02em' }}>{value}</span>
       </div>
       {bar != null && (
         <div style={{ width: '100%', height: 4, background: '#F1F5F9', borderRadius: 2 }}>

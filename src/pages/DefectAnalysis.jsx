@@ -31,7 +31,7 @@ export default function DefectAnalysis({ data, slideRef }) {
           >
             <div
               className="font-extrabold"
-              style={{ fontSize: 48, color: '#F43F5E', lineHeight: 1, letterSpacing: '-0.04em' }}
+              style={{ fontSize: T.kpiBig, color: '#F43F5E', lineHeight: 1, letterSpacing: '-0.04em' }}
             >
               {data.totalBugs}
             </div>
@@ -40,10 +40,10 @@ export default function DefectAnalysis({ data, slideRef }) {
                 Total Bugs in Sprint
               </div>
               <div className="flex gap-6 mt-2">
-                <span style={{ fontSize: 14, color: '#1E3A5F', fontWeight: 700 }}>
+                <span style={{ fontSize: T.bodyLg, color: '#1E3A5F', fontWeight: 700 }}>
                   {data.bugsDone} <span style={{ fontSize: T.desc, color: '#94A3B8', fontWeight: 500 }}>Resolved</span>
                 </span>
-                <span style={{ fontSize: 14, color: '#F43F5E', fontWeight: 700 }}>
+                <span style={{ fontSize: T.bodyLg, color: '#F43F5E', fontWeight: 700 }}>
                   {data.bugsTodo} <span style={{ fontSize: T.desc, color: '#94A3B8', fontWeight: 500 }}>Open</span>
                 </span>
               </div>
@@ -56,12 +56,12 @@ export default function DefectAnalysis({ data, slideRef }) {
             style={{ padding: '14px 24px', flex: 1, borderLeft: '3px solid #1E3A5F' }}
           >
             <div>
-              <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: T.label, color: '#94A3B8', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
                 Resolution Rate
               </div>
               <div
                 className="font-extrabold"
-                style={{ fontSize: 40, color: '#1E3A5F', lineHeight: 1.1, marginTop: 2, letterSpacing: '-0.03em' }}
+                style={{ fontSize: T.metricXl, color: '#1E3A5F', lineHeight: 1.1, marginTop: 2, letterSpacing: '-0.03em' }}
               >
                 {resolutionRate}%
               </div>
@@ -89,8 +89,8 @@ export default function DefectAnalysis({ data, slideRef }) {
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F43F5E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#F43F5E' }}>View All Bug Cards</div>
-              <div style={{ fontSize: 11, color: '#94A3B8', fontWeight: 500 }}>{data.totalBugs} issues</div>
+              <div style={{ fontSize: T.bodyLg, fontWeight: 700, color: '#F43F5E' }}>View All Bug Cards</div>
+              <div style={{ fontSize: T.label, color: '#94A3B8', fontWeight: 500 }}>{data.totalBugs} issues</div>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto' }}><path d="M9 18l6-6-6-6"/></svg>
           </button>
@@ -208,7 +208,7 @@ export default function DefectAnalysis({ data, slideRef }) {
                   />
                   <XAxis
                     type="number"
-                    tick={{ fontSize: 12, fill: '#94A3B8', fontWeight: 500 }}
+                    tick={{ fontSize: T.chartAxis, fill: '#94A3B8', fontWeight: 500 }}
                     allowDecimals={false}
                     axisLine={{ stroke: '#E2E8F0' }}
                     tickLine={false}
