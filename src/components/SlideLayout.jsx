@@ -64,8 +64,8 @@ export default function SlideLayout({ title, subtitle, children, slideRef }) {
             src={LOGO_URL}
             alt="Ayodia"
             style={{
-              width: 60,
-              height: 60,
+              width: 80,
+              height: 80,
               objectFit: 'contain',
               flexShrink: 0,
               marginLeft: 24,
