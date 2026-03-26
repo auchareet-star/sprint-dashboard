@@ -1,17 +1,10 @@
-import { T } from '../utils/typography';
+import { T, tooltipStyle } from '../utils/typography';
 import SlideLayout from '../components/SlideLayout';
 import DonutChart from '../charts/DonutChart';
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  CartesianGrid,
-  LabelList,
+  BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, LabelList,
 } from 'recharts';
+import { WrapTick, RoundedBarShape, TotalOnTop } from '../charts/chartUtils';
 
 const BUG_PRIORITY_COLORS = {
   Highest: '#991B1B',
@@ -21,68 +14,7 @@ const BUG_PRIORITY_COLORS = {
   Lowest: '#94A3B8',
 };
 
-const tooltipStyle = {
-  borderRadius: 12,
-  border: '1px solid #E2E8F0',
-  boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-  fontSize: 13,
-  fontWeight: 500,
-  padding: '10px 14px',
-};
-
 const PRIO_KEYS = ['Highest', 'High', 'Medium', 'Low', 'Lowest'];
-
-function RoundedPrioBar({ x, y, width, height, fill, prioKey, dataEntry }) {
-  if (!width || !height) return null;
-  let isTop = true;
-  const myIdx = PRIO_KEYS.indexOf(prioKey);
-  for (let i = myIdx + 1; i < PRIO_KEYS.length; i++) {
-    if ((dataEntry[PRIO_KEYS[i]] || 0) > 0) { isTop = false; break; }
-  }
-  const r = isTop ? 6 : 0;
-  return (
-    <path d={`M${x},${y} h${width - r} ${r ? `a${r},${r} 0 0 1 ${r},${r}` : `h${r}`} v${height - 2 * r} ${r ? `a${r},${r} 0 0 1 ${-r},${r}` : `v${r}`} h${-(width - r)} z`} fill={fill} />
-  );
-}
-
-function PrioTotalOnTop({ x, y, width, height, index, prioKey, data }) {
-  if (!data?.[index]) return null;
-  const row = data[index];
-  let topKey = null;
-  for (let i = PRIO_KEYS.length - 1; i >= 0; i--) {
-    if ((row[PRIO_KEYS[i]] || 0) > 0) { topKey = PRIO_KEYS[i]; break; }
-  }
-  if (prioKey !== topKey) return null;
-  const total = row._total;
-  if (!total) return null;
-  return (
-    <text x={x + width + 8} y={y + height / 2} fill="#475569" fontSize={T.chartLabel} fontWeight={700} dominantBaseline="central">
-      {total}
-    </text>
-  );
-}
-
-function WrapTick({ x, y, payload }) {
-  const text = payload.value || '';
-  let lines;
-  if (text.length <= 14) {
-    lines = [text];
-  } else {
-    const mid = Math.floor(text.length / 2);
-    let best = -1;
-    for (let i = 0; i < text.length; i++) {
-      if (text[i] === ' ' && (best === -1 || Math.abs(i - mid) < Math.abs(best - mid))) best = i;
-    }
-    lines = best > 0 ? [text.slice(0, best), text.slice(best + 1)] : [text];
-  }
-  const lh = 15;
-  const topY = y - ((lines.length - 1) * lh) / 2;
-  return (
-    <text x={x} textAnchor="end" fontSize={T.chartAxis} fontWeight={500} fill="#334155">
-      {lines.map((l, i) => <tspan key={i} x={x} y={topY + i * lh}>{l}</tspan>)}
-    </text>
-  );
-}
 
 export default function DefectAnalysis({ data, slideRef }) {
   const resolutionRate = data.totalBugs > 0 ? Math.round((data.bugsDone / data.totalBugs) * 100) : 0;
@@ -207,10 +139,10 @@ export default function DefectAnalysis({ data, slideRef }) {
                   <Legend wrapperStyle={{ fontSize: T.chartLegend, fontWeight: 600, paddingTop: 8, color: '#475569' }} iconType="circle" iconSize={8} />
                   {PRIO_KEYS.map((pk) => (
                     <Bar key={pk} dataKey={pk} stackId="a" fill={BUG_PRIORITY_COLORS[pk] || '#94A3B8'} barSize={32}
-                      shape={(props) => <RoundedPrioBar {...props} prioKey={pk} dataEntry={(data.bugStatusByPriority || [])[props.index] || {}} />}
+                      shape={(props) => <RoundedBarShape {...props} keys={PRIO_KEYS} currentKey={pk} dataEntry={(data.bugStatusByPriority || [])[props.index] || {}} />}
                     >
                       <LabelList dataKey={pk} position="center" fill="#fff" fontSize={T.chartLabel} fontWeight={700} formatter={(v) => (v > 0 ? v : '')} />
-                      <LabelList dataKey={pk} content={(props) => <PrioTotalOnTop {...props} prioKey={pk} data={data.bugStatusByPriority || []} />} />
+                      <LabelList dataKey={pk} content={(props) => <TotalOnTop {...props} keys={PRIO_KEYS} currentKey={pk} data={data.bugStatusByPriority || []} />} />
                     </Bar>
                   ))}
                 </BarChart>

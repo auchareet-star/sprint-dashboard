@@ -9,7 +9,7 @@ export default function KPICard({ label, value, subtitle, color = '#1E3A5F', lar
       <div className="font-extrabold" style={{ fontSize: large ? T.kpiBig : T.kpiSmall, color, lineHeight: 1, letterSpacing: '-0.03em' }}>
         {value}
       </div>
-      <div className="font-medium mt-2 text-center" style={{ fontSize: large ? T.kpiLabel : T.kpiLabel, color: '#64748B', letterSpacing: '0.01em' }}>
+      <div className="font-medium mt-2 text-center" style={{ fontSize: large ? T.kpiLabel : T.label, color: '#64748B', letterSpacing: '0.01em' }}>
         {label}
       </div>
       {subtitle && (
