@@ -78,7 +78,7 @@ function ClickableTick({ x, y, payload, goToAssignee }) {
     <text
       x={x}
       textAnchor="end"
-      fontSize={13}
+      fontSize={T.chartAxis}
       fontWeight={500}
       fill="#1E3A5F"
       style={{ cursor: goToAssignee ? 'pointer' : 'default' }}
@@ -100,7 +100,7 @@ function TotalChart({ data, height = 400, goToAssignee }) {
         margin={{ top: 12, right: 44, left: 12, bottom: 12 }}
       >
         <CartesianGrid strokeDasharray="none" stroke="#F1F5F9" horizontal={false} />
-        <YAxis dataKey="assignee" type="category" tick={goToAssignee ? <ClickableTick goToAssignee={goToAssignee} /> : { fontSize: 13, fill: '#334155', fontWeight: 500 }} width={150} axisLine={false} tickLine={false} />
+        <YAxis dataKey="assignee" type="category" tick={goToAssignee ? <ClickableTick goToAssignee={goToAssignee} /> : { fontSize: T.chartAxis, fill: '#334155', fontWeight: 500 }} width={150} axisLine={false} tickLine={false} />
         <XAxis type="number" tick={{ fontSize: 13, fill: '#94A3B8', fontWeight: 500 }} allowDecimals={false} axisLine={{ stroke: '#E2E8F0' }} tickLine={false} />
         <Tooltip contentStyle={tooltipStyle} />
         <Legend wrapperStyle={{ fontSize: 13, fontWeight: 600, paddingTop: 12, color: '#475569' }} iconType="circle" iconSize={8} />
