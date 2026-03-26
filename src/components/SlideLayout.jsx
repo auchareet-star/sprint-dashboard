@@ -15,7 +15,7 @@ export default function SlideLayout({ title, subtitle, children, slideRef }) {
       }}
     >
       {/* Left black bar */}
-      <div style={{ width: 8, background: '#0F172A', flexShrink: 0 }} />
+      <div style={{ width: 12, background: '#0F172A', flexShrink: 0 }} />
 
       {/* Main content area */}
       <div className="flex-1 flex flex-col" style={{ padding: '24px 48px 18px' }}>
