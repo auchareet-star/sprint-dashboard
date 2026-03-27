@@ -214,7 +214,7 @@ export default function DefectAnalysis({ data, slideRef }) {
                     tickLine={false}
                   />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="count" fill="#F43F5E" radius={[0, 6, 6, 0]} barSize={20}>
+                  <Bar dataKey="count" fill="#F43F5E" radius={[0, 6, 6, 0]} barSize={32}>
                     <LabelList dataKey="count" position="right" fontSize={12} fontWeight={700} fill="#475569" />
                   </Bar>
                 </BarChart>
