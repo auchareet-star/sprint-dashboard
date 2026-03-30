@@ -120,66 +120,42 @@ export async function fetchTeamMembers() {
   })).filter((m) => m.name);
 }
 
-export async function fetchSprintGoals() {
-  const rows = await fetchSheet('Sprint Goals');
-  // Columns: ลำดับ, ส่วนของหน้า, ฟังก์ชัน, หมายเหตุ
-  // Sprint metadata rows (section="Sprint"): Sprint name, Start Date, End Date
-  // Work items (section="Work Item"): groups of Epic, Feature, Task, Status
+/**
+ * Parse sprint goals from flat table format.
+ * Columns: ลำดับ, Sprint, Start Date, End Date, Epic, Feature, Task, Status, หมายเหตุ
+ * Each row is one work item.
+ */
+function parseSprintGoalsSheet(rows) {
   const meta = {};
   const items = [];
-  let current = {};
 
   rows.forEach((r) => {
-    const section = r['ส่วนของหน้า'] ?? '';
-    const fn = r['ฟังก์ชัน'] ?? '';
-    const value = r['หมายเหตุ'] ?? '';
+    if (!meta.sprint && r['Sprint']) meta.sprint = r['Sprint'];
+    if (!meta.startDate && r['Start Date']) meta.startDate = r['Start Date'];
+    if (!meta.endDate && r['End Date']) meta.endDate = r['End Date'];
 
-    if (section === 'Sprint') {
-      if (fn === 'Sprint') meta.sprint = value;
-      else if (fn === 'Start Date') meta.startDate = value;
-      else if (fn === 'End Date') meta.endDate = value;
-    } else if (section === 'Work Item') {
-      if (fn === 'Epic') {
-        // Start new group — push previous if complete
-        if (current.epic) items.push({ ...current });
-        current = { epic: value, feature: '', task: '', status: '' };
-      } else if (fn === 'Feature') current.feature = value;
-      else if (fn === 'Task') current.task = value;
-      else if (fn === 'Status') current.status = value;
+    const epic = r['Epic'] ?? '';
+    if (epic) {
+      items.push({
+        epic,
+        feature: r['Feature'] ?? '',
+        task: r['Task'] ?? '',
+        status: r['Status'] ?? '',
+      });
     }
   });
-  if (current.epic) items.push({ ...current });
 
   return { meta, items };
 }
 
+export async function fetchSprintGoals() {
+  const rows = await fetchSheet('Sprint Goals');
+  return parseSprintGoalsSheet(rows);
+}
+
 export async function fetchNextSprintGoals() {
   const rows = await fetchSheet('Next Sprint Goals');
-  const meta = {};
-  const items = [];
-  let current = {};
-
-  rows.forEach((r) => {
-    const section = r['ส่วนของหน้า'] ?? '';
-    const fn = r['ฟังก์ชัน'] ?? '';
-    const value = r['หมายเหตุ'] ?? '';
-
-    if (section === 'Sprint') {
-      if (fn === 'Sprint') meta.sprint = value;
-      else if (fn === 'Start Date') meta.startDate = value;
-      else if (fn === 'End Date') meta.endDate = value;
-    } else if (section === 'Work Item') {
-      if (fn === 'Epic') {
-        if (current.epic) items.push({ ...current });
-        current = { epic: value, feature: '', task: '', status: '' };
-      } else if (fn === 'Feature') current.feature = value;
-      else if (fn === 'Task') current.task = value;
-      else if (fn === 'Status') current.status = value;
-    }
-  });
-  if (current.epic) items.push({ ...current });
-
-  return { meta, items };
+  return parseSprintGoalsSheet(rows);
 }
 
 export async function fetchIssuesEncountered() {
