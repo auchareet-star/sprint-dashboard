@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { SlideContainer } from '../components/SlideLayout';
 import { toPng } from 'html-to-image';
-import { jsPDF } from 'jspdf';
 import CoverPage from './CoverPage';
 import AgendaPage from './AgendaPage';
 import TeamMembers from './TeamMembers';
@@ -121,6 +120,7 @@ export default function PresentMode({ data, onExit }) {
     setExporting(true);
 
     const savedIndex = index;
+    const { jsPDF } = await import('jspdf');
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [1920, 1080] });
 
     try {
