@@ -14,6 +14,7 @@ import SprintGoals from './pages/SprintGoals';
 import OverviewUpdate from './pages/OverviewUpdate';
 import NextSprintGoals from './pages/NextSprintGoals';
 import IssuesEncountered from './pages/IssuesEncountered';
+import PresentMode from './pages/PresentMode';
 
 const SLIDES = [
   { id: 'goals', label: 'Sprint Goals', Component: SprintGoals },
@@ -35,6 +36,9 @@ function parseHash(slides) {
   }
   if (hash === 'bugs') {
     return { view: 'bugs' };
+  }
+  if (hash === 'present' || hash.startsWith('present/')) {
+    return { view: 'present' };
   }
   const idx = slides.findIndex((s) => s.id === hash);
   return { view: 'slide', index: idx >= 0 ? idx : 0 };
@@ -265,6 +269,11 @@ export default function App() {
     );
   }
 
+  // Present mode
+  if (route.view === 'present') {
+    return <PresentMode data={{ ...data, cards, bugs }} onExit={() => { window.location.hash = 'goals'; }} />;
+  }
+
   // Slide view
   const { Component } = SLIDES[currentSlide];
 
@@ -323,6 +332,16 @@ export default function App() {
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
               Bug ({bugs.length})
+            </button>
+            <button
+              onClick={() => { window.location.hash = 'present'; }}
+              className="cursor-pointer flex items-center gap-1.5 rounded-lg"
+              style={{ fontSize: 12, fontWeight: 600, padding: '6px 14px', border: 'none', background: 'linear-gradient(135deg, #1E3A5F, #6366F1)', color: '#FFFFFF', transition: 'all 0.15s ease', boxShadow: '0 1px 4px rgba(30,58,95,0.2)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.9'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.opacity = '1'; }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Present
             </button>
           </div>
 
