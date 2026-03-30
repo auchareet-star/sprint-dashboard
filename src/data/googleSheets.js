@@ -120,6 +120,68 @@ export async function fetchTeamMembers() {
   })).filter((m) => m.name);
 }
 
+export async function fetchSprintGoals() {
+  const rows = await fetchSheet('Sprint Goals');
+  // Columns: ลำดับ, ส่วนของหน้า, ฟังก์ชัน, หมายเหตุ
+  // Sprint metadata rows (section="Sprint"): Sprint name, Start Date, End Date
+  // Work items (section="Work Item"): groups of Epic, Feature, Task, Status
+  const meta = {};
+  const items = [];
+  let current = {};
+
+  rows.forEach((r) => {
+    const section = r['ส่วนของหน้า'] ?? '';
+    const fn = r['ฟังก์ชัน'] ?? '';
+    const value = r['หมายเหตุ'] ?? '';
+
+    if (section === 'Sprint') {
+      if (fn === 'Sprint') meta.sprint = value;
+      else if (fn === 'Start Date') meta.startDate = value;
+      else if (fn === 'End Date') meta.endDate = value;
+    } else if (section === 'Work Item') {
+      if (fn === 'Epic') {
+        // Start new group — push previous if complete
+        if (current.epic) items.push({ ...current });
+        current = { epic: value, feature: '', task: '', status: '' };
+      } else if (fn === 'Feature') current.feature = value;
+      else if (fn === 'Task') current.task = value;
+      else if (fn === 'Status') current.status = value;
+    }
+  });
+  if (current.epic) items.push({ ...current });
+
+  return { meta, items };
+}
+
+export async function fetchNextSprintGoals() {
+  const rows = await fetchSheet('Next Sprint Goals');
+  const meta = {};
+  const items = [];
+  let current = {};
+
+  rows.forEach((r) => {
+    const section = r['ส่วนของหน้า'] ?? '';
+    const fn = r['ฟังก์ชัน'] ?? '';
+    const value = r['หมายเหตุ'] ?? '';
+
+    if (section === 'Sprint') {
+      if (fn === 'Sprint') meta.sprint = value;
+      else if (fn === 'Start Date') meta.startDate = value;
+      else if (fn === 'End Date') meta.endDate = value;
+    } else if (section === 'Work Item') {
+      if (fn === 'Epic') {
+        if (current.epic) items.push({ ...current });
+        current = { epic: value, feature: '', task: '', status: '' };
+      } else if (fn === 'Feature') current.feature = value;
+      else if (fn === 'Task') current.task = value;
+      else if (fn === 'Status') current.status = value;
+    }
+  });
+  if (current.epic) items.push({ ...current });
+
+  return { meta, items };
+}
+
 export function isGoogleSheetsConfigured() {
   return Boolean(SHEET_ID);
 }

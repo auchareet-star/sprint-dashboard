@@ -10,17 +10,21 @@ import DefectAnalysis from './pages/DefectAnalysis';
 import TeamMembers from './pages/TeamMembers';
 import AssigneeView from './pages/AssigneeView';
 import BugListView from './pages/BugListView';
+import SprintGoals from './pages/SprintGoals';
+import NextSprintGoals from './pages/NextSprintGoals';
 
 const SLIDES = [
+  { id: 'goals', label: 'Sprint Goals', Component: SprintGoals },
   { id: 'members', label: 'Team Members', Component: TeamMembers },
   { id: 'executive', label: 'Executive Summary', Component: ExecutiveSummary },
   { id: 'effort', label: 'Effort Overview', Component: EffortOverview },
   { id: 'team', label: 'Team Performance', Component: TeamPerformance },
   { id: 'gap', label: 'Effort Gap', Component: EffortGap },
   { id: 'defects', label: 'Defect Analysis', Component: DefectAnalysis },
+  { id: 'next-goals', label: 'Next Sprint Goals', Component: NextSprintGoals },
 ];
 
-function parseHash() {
+function parseHash(slides) {
   const hash = window.location.hash.replace('#', '');
   if (hash.startsWith('assignee/')) {
     return { view: 'assignee', name: decodeURIComponent(hash.slice('assignee/'.length)) };
@@ -28,7 +32,7 @@ function parseHash() {
   if (hash === 'bugs') {
     return { view: 'bugs' };
   }
-  const idx = SLIDES.findIndex((s) => s.id === hash);
+  const idx = slides.findIndex((s) => s.id === hash);
   return { view: 'slide', index: idx >= 0 ? idx : 0 };
 }
 
@@ -138,12 +142,13 @@ function BugListNav({ assigneeList, goToAssignee, slideRef }) {
 }
 
 export default function App() {
-  const [route, setRoute] = useState(parseHash);
   const [showAssigneeMenu, setShowAssigneeMenu] = useState(false);
   const slideRef = useRef(null);
-  const { cards, bugs, team, loading, source } = useData();
+  const { cards, bugs, team, sprintGoals, nextSprintGoals, loading, source } = useData();
   const processed = useProcessedData(cards, bugs);
-  const data = { ...processed, team };
+  const data = { ...processed, team, sprintGoals, nextSprintGoals };
+
+  const [route, setRoute] = useState(() => parseHash(SLIDES));
 
   // Sync hash
   useEffect(() => {
@@ -154,7 +159,7 @@ export default function App() {
 
   // Listen for hash changes
   useEffect(() => {
-    const onHash = () => setRoute(parseHash());
+    const onHash = () => setRoute(parseHash(SLIDES));
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
