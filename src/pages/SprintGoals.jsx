@@ -242,15 +242,15 @@ function EpicList({ epics, offset = 0 }) {
                       {st && (
                         <span
                           style={{
-                            fontSize: 11,
+                            fontSize: T.caption,
                             fontWeight: 600,
                             color: st.color,
                             background: st.bg,
                             border: `1px solid ${st.border}`,
                             borderRadius: 6,
-                            padding: '1px 8px',
+                            padding: '2px 10px',
                             flexShrink: 0,
-                            lineHeight: '18px',
+                            lineHeight: '20px',
                           }}
                         >
                           {task.status}

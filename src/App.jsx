@@ -11,12 +11,14 @@ import TeamMembers from './pages/TeamMembers';
 import AssigneeView from './pages/AssigneeView';
 import BugListView from './pages/BugListView';
 import SprintGoals from './pages/SprintGoals';
+import OverviewUpdate from './pages/OverviewUpdate';
 import NextSprintGoals from './pages/NextSprintGoals';
 import IssuesEncountered from './pages/IssuesEncountered';
 
 const SLIDES = [
   { id: 'goals', label: 'Sprint Goals', Component: SprintGoals },
   { id: 'members', label: 'Team Members', Component: TeamMembers },
+  { id: 'overview', label: 'Overview Update', Component: OverviewUpdate },
   { id: 'executive', label: 'Executive Summary', Component: ExecutiveSummary },
   { id: 'effort', label: 'Effort Overview', Component: EffortOverview },
   { id: 'team', label: 'Team Performance', Component: TeamPerformance },
@@ -146,9 +148,9 @@ function BugListNav({ assigneeList, goToAssignee, slideRef }) {
 export default function App() {
   const [showAssigneeMenu, setShowAssigneeMenu] = useState(false);
   const slideRef = useRef(null);
-  const { cards, bugs, team, sprintGoals, nextSprintGoals, issues, loading, source } = useData();
+  const { cards, bugs, team, sprintGoals, nextSprintGoals, issues, overviewUpdate, sprintList, loading, source } = useData();
   const processed = useProcessedData(cards, bugs);
-  const data = { ...processed, team, sprintGoals, nextSprintGoals, issues };
+  const data = { ...processed, team, sprintGoals, nextSprintGoals, issues, overviewUpdate, sprintList };
 
   const [route, setRoute] = useState(() => parseHash(SLIDES));
 

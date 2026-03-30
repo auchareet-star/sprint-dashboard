@@ -158,6 +158,28 @@ export async function fetchNextSprintGoals() {
   return parseSprintGoalsSheet(rows);
 }
 
+export async function fetchOverviewUpdate() {
+  const rows = await fetchSheet('Overview Update');
+  return rows.map((r) => ({
+    module: r['Module'] ?? '',
+    task: r['Task'] ?? '',
+    startSprint: r['Start Sprint'] ?? '',
+    endSprint: r['End Sprint'] ?? '',
+    status: r['Status'] ?? '',
+    notes: r['Remark'] ?? r['หมายเหตุ'] ?? '',
+  })).filter((r) => r.module);
+}
+
+export async function fetchSprintList() {
+  const rows = await fetchSheet('Sprint');
+  return rows.map((r) => ({
+    name: r['Sprint'] ?? '',
+    startDate: r['Start Date'] ?? '',
+    endDate: r['End Date'] ?? '',
+    active: r['Active'] ?? '',
+  })).filter((r) => r.name);
+}
+
 export async function fetchIssuesEncountered() {
   const rows = await fetchSheet('Issues Encountered');
   return rows.map((r) => ({

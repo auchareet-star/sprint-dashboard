@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { rawAll, rawBugs } from '../data/sampleData';
-import { fetchAllCards, fetchBugs, fetchTeamMembers, fetchSprintGoals, fetchNextSprintGoals, fetchIssuesEncountered, isGoogleSheetsConfigured } from '../data/googleSheets';
+import { fetchAllCards, fetchBugs, fetchTeamMembers, fetchSprintGoals, fetchNextSprintGoals, fetchOverviewUpdate, fetchSprintList, fetchIssuesEncountered, isGoogleSheetsConfigured } from '../data/googleSheets';
 
 export function useData() {
   const [cards, setCards] = useState(rawAll);
@@ -9,6 +9,8 @@ export function useData() {
   const [sprintGoals, setSprintGoals] = useState({ meta: {}, items: [] });
   const [nextSprintGoals, setNextSprintGoals] = useState({ meta: {}, items: [] });
   const [issues, setIssues] = useState([]);
+  const [overviewUpdate, setOverviewUpdate] = useState([]);
+  const [sprintList, setSprintList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [source, setSource] = useState('sample');
 
@@ -44,11 +46,19 @@ export function useData() {
       .then((i) => { console.log('Issues loaded:', i.length); setIssues(i); })
       .catch((err) => console.warn('fetchIssuesEncountered failed:', err));
 
-    Promise.all([loadCards, loadBugs, loadTeam, loadGoals, loadNextGoals, loadIssues]).finally(() => {
+    const loadOverview = fetchOverviewUpdate()
+      .then((o) => { console.log('Overview Update loaded:', o.length); setOverviewUpdate(o); })
+      .catch((err) => console.warn('fetchOverviewUpdate failed:', err));
+
+    const loadSprintList = fetchSprintList()
+      .then((s) => { console.log('Sprint list loaded:', s.length); setSprintList(s); })
+      .catch((err) => console.warn('fetchSprintList failed:', err));
+
+    Promise.all([loadCards, loadBugs, loadTeam, loadGoals, loadNextGoals, loadIssues, loadOverview, loadSprintList]).finally(() => {
       setSource(cardsOk || bugsOk ? 'google' : 'sample');
       setLoading(false);
     });
   }, []);
 
-  return { cards, bugs, team, sprintGoals, nextSprintGoals, issues, loading, source };
+  return { cards, bugs, team, sprintGoals, nextSprintGoals, issues, overviewUpdate, sprintList, loading, source };
 }
