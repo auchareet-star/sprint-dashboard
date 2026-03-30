@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { rawAll, rawBugs } from '../data/sampleData';
-import { fetchAllCards, fetchBugs, fetchTeamMembers, fetchSprintGoals, fetchNextSprintGoals, isGoogleSheetsConfigured } from '../data/googleSheets';
+import { fetchAllCards, fetchBugs, fetchTeamMembers, fetchSprintGoals, fetchNextSprintGoals, fetchIssuesEncountered, isGoogleSheetsConfigured } from '../data/googleSheets';
 
 export function useData() {
   const [cards, setCards] = useState(rawAll);
@@ -8,6 +8,7 @@ export function useData() {
   const [team, setTeam] = useState([]);
   const [sprintGoals, setSprintGoals] = useState({ meta: {}, items: [] });
   const [nextSprintGoals, setNextSprintGoals] = useState({ meta: {}, items: [] });
+  const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(false);
   const [source, setSource] = useState('sample');
 
@@ -39,11 +40,15 @@ export function useData() {
       .then((g) => { console.log('Next Sprint Goals loaded:', g.items.length); setNextSprintGoals(g); })
       .catch((err) => console.warn('fetchNextSprintGoals failed:', err));
 
-    Promise.all([loadCards, loadBugs, loadTeam, loadGoals, loadNextGoals]).finally(() => {
+    const loadIssues = fetchIssuesEncountered()
+      .then((i) => { console.log('Issues loaded:', i.length); setIssues(i); })
+      .catch((err) => console.warn('fetchIssuesEncountered failed:', err));
+
+    Promise.all([loadCards, loadBugs, loadTeam, loadGoals, loadNextGoals, loadIssues]).finally(() => {
       setSource(cardsOk || bugsOk ? 'google' : 'sample');
       setLoading(false);
     });
   }, []);
 
-  return { cards, bugs, team, sprintGoals, nextSprintGoals, loading, source };
+  return { cards, bugs, team, sprintGoals, nextSprintGoals, issues, loading, source };
 }

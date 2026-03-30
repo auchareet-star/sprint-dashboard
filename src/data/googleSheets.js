@@ -182,6 +182,15 @@ export async function fetchNextSprintGoals() {
   return { meta, items };
 }
 
+export async function fetchIssuesEncountered() {
+  const rows = await fetchSheet('Issues Encountered');
+  return rows.map((r) => ({
+    issue: r['Issues'] ?? '',
+    impacts: r['Impacts'] ?? '',
+    solutions: r['Solutions'] ?? '',
+  })).filter((r) => r.issue);
+}
+
 export function isGoogleSheetsConfigured() {
   return Boolean(SHEET_ID);
 }
