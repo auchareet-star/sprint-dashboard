@@ -122,8 +122,13 @@ export async function fetchTeamMembers() {
 
 /**
  * Parse sprint goals from flat table format.
- * Columns: ลำดับ, Sprint, Start Date, End Date, Epic, Feature, Task, Status, หมายเหตุ
- * Each row is one work item.
+ * Columns: No, Sprint, Epic, Feature, Task, Status, Remark
+ * Dates come from Sprint sheet (sprintList).
+ */
+/**
+ * Parse sprint goals from flat table format.
+ * Columns: No, Sprint, Epic, Feature, Task, Status, Remark
+ * Dates are resolved later from Sprint sheet via resolveSprintDates().
  */
 function parseSprintGoalsSheet(rows) {
   const meta = {};
@@ -131,8 +136,6 @@ function parseSprintGoalsSheet(rows) {
 
   rows.forEach((r) => {
     if (!meta.sprint && r['Sprint']) meta.sprint = r['Sprint'];
-    if (!meta.startDate && r['Start Date']) meta.startDate = r['Start Date'];
-    if (!meta.endDate && r['End Date']) meta.endDate = r['End Date'];
 
     const epic = r['Epic'] ?? '';
     if (epic) {
@@ -141,11 +144,25 @@ function parseSprintGoalsSheet(rows) {
         feature: r['Feature'] ?? '',
         task: r['Task'] ?? '',
         status: r['Status'] ?? '',
+        remark: r['Remark'] ?? '',
       });
     }
   });
 
   return { meta, items };
+}
+
+/** Enrich sprint goals meta with dates from Sprint sheet */
+export function resolveSprintDates(goals, sprintList) {
+  if (!goals?.meta?.sprint || !sprintList?.length) return goals;
+  const sp = sprintList.find((s) => s.name === goals.meta.sprint);
+  if (sp) {
+    return {
+      ...goals,
+      meta: { ...goals.meta, startDate: sp.startDate, endDate: sp.endDate },
+    };
+  }
+  return goals;
 }
 
 export async function fetchSprintGoals() {
@@ -166,7 +183,7 @@ export async function fetchOverviewUpdate() {
     startSprint: r['Start Sprint'] ?? '',
     endSprint: r['End Sprint'] ?? '',
     status: r['Status'] ?? '',
-    notes: r['Remark'] ?? r['หมายเหตุ'] ?? '',
+    notes: r['Remark'] ?? '',
   })).filter((r) => r.module);
 }
 

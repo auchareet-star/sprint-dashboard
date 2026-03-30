@@ -36,7 +36,7 @@ function buildTree(items) {
       epic.featureMap[item.feature] = feat;
       epic.features.push(feat);
     }
-    feat.tasks.push({ name: item.task, status: item.status });
+    feat.tasks.push({ name: item.task, status: item.status, remark: item.remark });
   });
 
   return epics;
@@ -129,7 +129,7 @@ export function SprintGoalsView({ goals: goalsInput, title, slideRef }) {
               <line x1="8" y1="2" x2="8" y2="6" />
               <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
-            <span style={{ fontSize: T.label, fontWeight: 600, color: '#475569' }}>
+            <span style={{ fontSize: T.body, fontWeight: 600, color: '#475569' }}>
               {duration}
             </span>
           </div>
@@ -191,7 +191,7 @@ function EpicList({ epics, offset = 0 }) {
               flexShrink: 0,
             }}
           />
-          <span style={{ fontSize: T.body, fontWeight: 700, color: '#0F172A', letterSpacing: '-0.01em' }}>
+          <span style={{ fontSize: T.section, fontWeight: 700, color: '#0F172A', letterSpacing: '-0.01em' }}>
             {epic.name}
           </span>
         </div>
@@ -212,7 +212,7 @@ function EpicList({ epics, offset = 0 }) {
                     flexShrink: 0,
                   }}
                 />
-                <span style={{ fontSize: T.label, fontWeight: 600, color: '#334155' }}>
+                <span style={{ fontSize: T.body, fontWeight: 600, color: '#334155' }}>
                   {feat.name}
                 </span>
               </div>
@@ -236,21 +236,26 @@ function EpicList({ epics, offset = 0 }) {
                           flexShrink: 0,
                         }}
                       />
-                      <span style={{ fontSize: T.micro, fontWeight: 500, color: '#64748B', flex: 1 }}>
+                      <span style={{ fontSize: T.label, fontWeight: 500, color: '#64748B', flex: 1 }}>
                         {task.name}
+                        {task.remark && (
+                          <span style={{ color: '#D97706', fontWeight: 500, marginLeft: 6 }}>
+                            ({task.remark})
+                          </span>
+                        )}
                       </span>
                       {st && (
                         <span
                           style={{
-                            fontSize: T.caption,
+                            fontSize: T.label,
                             fontWeight: 600,
                             color: st.color,
                             background: st.bg,
                             border: `1px solid ${st.border}`,
                             borderRadius: 6,
-                            padding: '2px 10px',
+                            padding: '2px 12px',
                             flexShrink: 0,
-                            lineHeight: '20px',
+                            lineHeight: '22px',
                           }}
                         >
                           {task.status}

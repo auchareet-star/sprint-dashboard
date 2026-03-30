@@ -59,7 +59,7 @@ function HeaderCell({ label, color, icon }) {
         display: 'flex',
         alignItems: 'center',
         gap: 8,
-        padding: '10px 16px',
+        padding: '12px 20px',
         background: color.bg,
         border: `1px solid ${color.border}`,
         borderRadius: 10,
@@ -67,7 +67,7 @@ function HeaderCell({ label, color, icon }) {
       }}
     >
       {icon}
-      <span style={{ fontSize: T.body, fontWeight: 700, color: color.icon }}>
+      <span style={{ fontSize: T.section, fontWeight: 700, color: color.icon }}>
         {label}
       </span>
     </div>
@@ -92,20 +92,20 @@ function Cell({ lines, color }) {
         <div
           key={i}
           className="flex items-start gap-2"
-          style={{ marginBottom: i < lines.length - 1 ? 6 : 0 }}
+          style={{ marginBottom: i < lines.length - 1 ? 8 : 0 }}
         >
           <div
             style={{
-              width: 6,
-              height: 6,
+              width: 8,
+              height: 8,
               borderRadius: '50%',
               background: color.accent,
               opacity: 0.45,
               flexShrink: 0,
-              marginTop: 7,
+              marginTop: 8,
             }}
           />
-          <span style={{ fontSize: T.label, fontWeight: 500, color: '#334155', lineHeight: '20px' }}>
+          <span style={{ fontSize: T.body, fontWeight: 500, color: '#334155', lineHeight: '24px' }}>
             {line}
           </span>
         </div>
@@ -116,7 +116,7 @@ function Cell({ lines, color }) {
 
 function IssueIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F43F5E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F43F5E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="10" />
       <line x1="12" y1="8" x2="12" y2="12" />
       <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -126,7 +126,7 @@ function IssueIcon() {
 
 function ImpactIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
       <line x1="12" y1="9" x2="12" y2="13" />
       <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -136,7 +136,7 @@ function ImpactIcon() {
 
 function SolutionIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0D9488" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0D9488" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
       <polyline points="22 4 12 14.01 9 11.01" />
     </svg>

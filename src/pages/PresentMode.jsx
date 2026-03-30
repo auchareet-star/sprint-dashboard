@@ -1,5 +1,7 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
-import { SlideContainer, ExportButton, CopyImageButton } from '../components/SlideLayout';
+import { SlideContainer } from '../components/SlideLayout';
+import { toPng } from 'html-to-image';
+import { jsPDF } from 'jspdf';
 import CoverPage from './CoverPage';
 import AgendaPage from './AgendaPage';
 import TeamMembers from './TeamMembers';
@@ -38,6 +40,7 @@ const STATIC_PRESENT = [
 export default function PresentMode({ data, onExit }) {
   const slideRef = useRef(null);
   const [index, setIndex] = useState(0);
+  const [exporting, setExporting] = useState(false);
 
   // Build slides with dynamic Card in Sprint per assignee
   const slides = useMemo(() => {
@@ -78,6 +81,7 @@ export default function PresentMode({ data, onExit }) {
   // Keyboard navigation
   useEffect(() => {
     const handleKey = (e) => {
+      if (exporting) return;
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
         e.preventDefault();
         goNext();
@@ -90,7 +94,83 @@ export default function PresentMode({ data, onExit }) {
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [goNext, goPrev, onExit]);
+  }, [goNext, goPrev, onExit, exporting]);
+
+  // Build PDF filename from sprint data
+  const pdfFileName = useMemo(() => {
+    const meta = data.sprintGoals?.meta || {};
+    const endDate = (meta.endDate || '').replace(/\//g, '');
+    const sprint = meta.sprint || 'Sprint';
+    return `AYD-Sprint review monitoring_${endDate}_HA.OS-Sprint review (${sprint})`;
+  }, [data.sprintGoals]);
+
+  // Wait for DOM paint + recharts animation to complete
+  const waitForRender = () => new Promise((resolve) => {
+    // Double requestAnimationFrame ensures the browser has painted
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        // Extra delay for recharts animations to settle
+        setTimeout(resolve, 800);
+      });
+    });
+  });
+
+  // Export all slides to PDF
+  const handleExportPDF = useCallback(async () => {
+    if (exporting) return;
+    setExporting(true);
+
+    const savedIndex = index;
+    const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [1920, 1080] });
+
+    try {
+      for (let i = 0; i < slides.length; i++) {
+        // Use functional update to ensure React processes the state change
+        await new Promise((resolve) => {
+          setIndex(i);
+          // Wait for React render + paint + recharts animation (~2s)
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              setTimeout(resolve, 2500);
+            });
+          });
+        });
+
+        const el = slideRef.current;
+        if (!el) continue;
+
+        // Capture slide as JPEG (smaller file size than PNG)
+        let dataUrl;
+        for (let attempt = 0; attempt < 2; attempt++) {
+          try {
+            dataUrl = await toPng(el, {
+              width: 1920,
+              height: 1080,
+              pixelRatio: 1,
+              cacheBust: true,
+              imagePlaceholder: '',
+            });
+            break;
+          } catch (err) {
+            if (attempt === 1) throw err;
+            await new Promise((r) => setTimeout(r, 500));
+          }
+        }
+
+        if (!dataUrl) continue;
+
+        if (i > 0) pdf.addPage([1920, 1080], 'landscape');
+        pdf.addImage(dataUrl, 'JPEG', 0, 0, 1920, 1080, undefined, 'FAST');
+      }
+
+      pdf.save(`${pdfFileName}.pdf`);
+    } catch (err) {
+      console.error('PDF export failed:', err);
+    } finally {
+      setIndex(savedIndex);
+      setExporting(false);
+    }
+  }, [exporting, index, slides, pdfFileName]);
 
   return (
     <SlideContainer
@@ -129,10 +209,31 @@ export default function PresentMode({ data, onExit }) {
             &#8250;
           </button>
 
-          {/* Right: Export */}
+          {/* Right: Export PDF */}
           <div className="flex items-center gap-3" style={{ position: 'absolute', right: 16 }}>
-            <CopyImageButton slideRef={slideRef} />
-            <ExportButton slideRef={slideRef} />
+            <button
+              onClick={handleExportPDF}
+              disabled={exporting}
+              className="cursor-pointer flex items-center gap-1.5 rounded-lg text-white px-4 py-1.5"
+              style={{
+                fontSize: 16,
+                fontWeight: 600,
+                background: exporting ? '#94A3B8' : 'linear-gradient(135deg, #1E3A5F, #6366F1)',
+                border: 'none',
+                boxShadow: '0 1px 4px rgba(30, 58, 95, 0.2)',
+                letterSpacing: '0.02em',
+                transition: 'opacity 0.15s ease',
+                opacity: exporting ? 0.7 : 1,
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="12" y1="18" x2="12" y2="12" />
+                <polyline points="9 15 12 18 15 15" />
+              </svg>
+              {exporting ? `Exporting... (${current + 1}/${total})` : 'Export PDF'}
+            </button>
           </div>
         </div>
       }
