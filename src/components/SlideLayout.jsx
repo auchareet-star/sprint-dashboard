@@ -4,11 +4,12 @@ import { T } from '../utils/typography';
 
 const LOGO_URL = import.meta.env.BASE_URL + 'ayodia-logo.png';
 
-export default function SlideLayout({ title, subtitle, children, slideRef }) {
+export default function SlideLayout({ title, subtitle, children, slideRef, isExporting = false }) {
   return (
     <div
       ref={slideRef}
       className="slide flex"
+      data-exporting={isExporting ? 'true' : 'false'}
       style={{
         background: '#F8FAFC',
         overflow: 'hidden',

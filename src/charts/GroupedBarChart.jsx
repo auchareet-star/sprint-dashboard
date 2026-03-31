@@ -7,7 +7,7 @@ import { WrapTick } from './chartUtils';
 
 const fmt2 = (v) => (typeof v === 'number' ? v.toFixed(2) : v);
 
-export default function GroupedBarChart({ data, dataKeyX = 'status', width = '100%', height = 400, layout = 'vertical' }) {
+export default function GroupedBarChart({ data, dataKeyX = 'status', width = '100%', height = 400, layout = 'vertical', disableAnimation = false }) {
   const isHorizontal = layout === 'horizontal';
   return (
     <ResponsiveContainer width={width} height={height}>
@@ -26,10 +26,10 @@ export default function GroupedBarChart({ data, dataKeyX = 'status', width = '10
         )}
         <Tooltip contentStyle={tooltipStyle} formatter={(value) => fmt2(value)} />
         <Legend wrapperStyle={legendStyle} iconType="circle" iconSize={8} />
-        <Bar dataKey="Estimate" fill={EFFORT_COLORS.Estimate} radius={isHorizontal ? [4, 4, 0, 0] : [0, 6, 6, 0]} barSize={28}>
+        <Bar dataKey="Estimate" fill={EFFORT_COLORS.Estimate} radius={isHorizontal ? [4, 4, 0, 0] : [0, 6, 6, 0]} barSize={28} isAnimationActive={!disableAnimation}>
           <LabelList dataKey="Estimate" position={isHorizontal ? 'top' : 'right'} fontSize={T.chartLabel} fontWeight={600} fill="#475569" formatter={fmt2} />
         </Bar>
-        <Bar dataKey="Actual" fill={EFFORT_COLORS.Actual} radius={isHorizontal ? [4, 4, 0, 0] : [0, 6, 6, 0]} barSize={28}>
+        <Bar dataKey="Actual" fill={EFFORT_COLORS.Actual} radius={isHorizontal ? [4, 4, 0, 0] : [0, 6, 6, 0]} barSize={28} isAnimationActive={!disableAnimation}>
           <LabelList dataKey="Actual" position={isHorizontal ? 'top' : 'right'} fontSize={T.chartLabel} fontWeight={600} fill="#475569" formatter={fmt2} />
         </Bar>
       </BarChart>

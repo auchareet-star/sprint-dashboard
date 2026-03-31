@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import { STATUS_ORDER, STATUS_COLORS } from '../utils/colors';
 
-export default function EffortOverview({ data, slideRef }) {
+export default function EffortOverview({ data, slideRef, isExporting = false }) {
   const variance = data.totalActual - data.totalEstimate;
   const isOver = variance > 0;
 
@@ -40,7 +40,7 @@ export default function EffortOverview({ data, slideRef }) {
               Man-days comparison by work status
             </p>
             <div className="flex-1 min-h-0">
-              <EffortByStatusChart data={data.effortByStatus} />
+              <EffortByStatusChart data={data.effortByStatus} disableAnimation={isExporting} />
             </div>
           </div>
 
@@ -56,7 +56,7 @@ export default function EffortOverview({ data, slideRef }) {
               Card count by current status
             </p>
             <div className="flex-1 min-h-0 w-full flex items-center justify-center">
-              <DonutChart data={data.statusDistribution} height="100%" innerRadius={80} outerRadius={150} centerLabel="Cards" />
+              <DonutChart data={data.statusDistribution} height="100%" innerRadius={80} outerRadius={150} centerLabel="Cards" disableAnimation={isExporting} />
             </div>
           </div>
         </div>
@@ -122,7 +122,7 @@ function RoundedVerticalBar({ x, y, width, height, fill, statusKey, activeStatus
   );
 }
 
-function EffortByStatusChart({ data }) {
+function EffortByStatusChart({ data, disableAnimation = false }) {
   const activeStatuses = STATUS_ORDER.filter((s) => data.some((row) => (row[s] || 0) > 0));
 
   return (
@@ -135,6 +135,7 @@ function EffortByStatusChart({ data }) {
         <Legend wrapperStyle={legendStyle} iconType="circle" iconSize={8} />
         {activeStatuses.map((status) => (
           <Bar key={status} dataKey={status} stackId="a" fill={STATUS_COLORS[status]} barSize={120}
+            isAnimationActive={!disableAnimation}
             shape={(props) => <RoundedVerticalBar {...props} statusKey={status} activeStatuses={activeStatuses} dataEntry={data[props.index] || {}} />}
           >
             <LabelList dataKey={status} position="center" fill="#fff" fontSize={T.chartLabel} fontWeight={700}

@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { SlideContainer } from '../components/SlideLayout';
-import { toPng } from 'html-to-image';
+import { toJpeg } from 'html-to-image';
 import CoverPage from './CoverPage';
 import AgendaPage from './AgendaPage';
 import TeamMembers from './TeamMembers';
@@ -41,6 +41,13 @@ export default function PresentMode({ data, onExit }) {
   const [index, setIndex] = useState(0);
   const [exporting, setExporting] = useState(false);
 
+  useEffect(() => {
+    document.body.dataset.exporting = exporting ? 'true' : 'false';
+    return () => {
+      delete document.body.dataset.exporting;
+    };
+  }, [exporting]);
+
   // Build slides with dynamic Card in Sprint per assignee
   const slides = useMemo(() => {
     const cards = data.cards || [];
@@ -63,7 +70,7 @@ export default function PresentMode({ data, onExit }) {
       } else {
         result.push({
           ...s,
-          render: (props) => <s.Component data={props.data} slideRef={props.slideRef} />,
+          render: (props) => <s.Component data={props.data} slideRef={props.slideRef} isExporting={props.isExporting} />,
         });
       }
     });
@@ -108,8 +115,8 @@ export default function PresentMode({ data, onExit }) {
     // Double requestAnimationFrame ensures the browser has painted
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        // Extra delay for recharts animations to settle
-        setTimeout(resolve, 800);
+        // Small buffer to ensure layout settles before capture.
+        setTimeout(resolve, 250);
       });
     });
   });
@@ -120,35 +127,33 @@ export default function PresentMode({ data, onExit }) {
     setExporting(true);
 
     const savedIndex = index;
-    const { jsPDF } = await import('jspdf');
-    const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [1920, 1080] });
 
     try {
+      const { jsPDF } = await import('jspdf');
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [1920, 1080] });
+
       for (let i = 0; i < slides.length; i++) {
-        // Use functional update to ensure React processes the state change
+        // Move to the target slide, then wait for paint/animations to settle.
         await new Promise((resolve) => {
           setIndex(i);
-          // Wait for React render + paint + recharts animation (~2s)
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              setTimeout(resolve, 2500);
-            });
-          });
+          resolve();
         });
+        await waitForRender();
 
         const el = slideRef.current;
         if (!el) continue;
 
-        // Capture slide as JPEG (smaller file size than PNG)
+        // Capture slide as JPEG to reduce encode time and PDF size.
         let dataUrl;
         for (let attempt = 0; attempt < 2; attempt++) {
           try {
-            dataUrl = await toPng(el, {
+            dataUrl = await toJpeg(el, {
               width: 1920,
               height: 1080,
               pixelRatio: 1,
               cacheBust: true,
               imagePlaceholder: '',
+              quality: 0.9,
             });
             break;
           } catch (err) {
@@ -238,7 +243,7 @@ export default function PresentMode({ data, onExit }) {
         </div>
       }
     >
-      {slideObj.render({ data, slideRef })}
+      {slideObj.render({ data, slideRef, isExporting: exporting })}
     </SlideContainer>
   );
 }

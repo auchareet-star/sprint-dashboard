@@ -3,12 +3,12 @@ import SlideLayout from '../components/SlideLayout';
 import KPICard from '../components/KPICard';
 import HorizontalStackedBar from '../charts/HorizontalStackedBar';
 
-export default function ExecutiveSummary({ data, slideRef }) {
+export default function ExecutiveSummary({ data, slideRef, isExporting = false }) {
   const pctPlanned = data.total > 0 ? Math.round((data.plannedCount / data.total) * 100) : 0;
   const isHighUnplanned = data.pctUnplanned > 30;
 
   return (
-    <SlideLayout title="Executive Summary" subtitle="Sprint Overview" slideRef={slideRef}>
+    <SlideLayout title="Executive Summary" subtitle="Sprint Overview" slideRef={slideRef} isExporting={isExporting}>
       <div className="flex flex-col gap-4 h-full">
         {/* Top: KPI Row — 5 metrics in one line */}
         <div className="grid gap-3 flex-none animate-slide-up animate-delay-1" style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
@@ -33,7 +33,7 @@ export default function ExecutiveSummary({ data, slideRef }) {
               Breakdown of work items across statuses
             </p>
             <div className="flex-1 min-h-0">
-              <HorizontalStackedBar data={data.statusByType} height="100%" />
+              <HorizontalStackedBar data={data.statusByType} height="100%" disableAnimation={isExporting} />
             </div>
           </div>
 
@@ -51,18 +51,21 @@ export default function ExecutiveSummary({ data, slideRef }) {
                 value={`${data.pctDone}%`}
                 color="#0D9488"
                 bar={data.pctDone}
+                isExporting={isExporting}
               />
               <InsightRow
                 label="Planned Ratio"
                 value={`${pctPlanned}%`}
                 color="#1E3A5F"
                 bar={pctPlanned}
+                isExporting={isExporting}
               />
               <InsightRow
                 label="Unplanned Ratio"
                 value={`${data.pctUnplanned}%`}
                 color="#F59E0B"
                 bar={data.pctUnplanned}
+                isExporting={isExporting}
               />
               <InsightRow
                 label="Bug Count"
@@ -114,7 +117,7 @@ export default function ExecutiveSummary({ data, slideRef }) {
   );
 }
 
-function InsightRow({ label, value, color, bar }) {
+function InsightRow({ label, value, color, bar, isExporting = false }) {
   return (
     <div>
       <div className="flex items-center justify-between" style={{ marginBottom: 3 }}>
@@ -128,7 +131,7 @@ function InsightRow({ label, value, color, bar }) {
             height: '100%',
             background: color,
             borderRadius: 2,
-            transition: 'width 0.6s ease',
+            transition: isExporting ? 'none' : 'width 0.6s ease',
           }} />
         </div>
       )}

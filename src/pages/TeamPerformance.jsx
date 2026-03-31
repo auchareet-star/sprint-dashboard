@@ -35,7 +35,7 @@ function ClickableTick({ x, y, payload, goToAssignee }) {
   );
 }
 
-function TotalChart({ data, height = 400, goToAssignee }) {
+function TotalChart({ data, height = 400, goToAssignee, disableAnimation = false }) {
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={data} layout="vertical" margin={{ top: 12, right: 44, left: 12, bottom: 12 }}>
@@ -46,6 +46,7 @@ function TotalChart({ data, height = 400, goToAssignee }) {
         <Legend wrapperStyle={legendStyle} iconType="circle" iconSize={8} />
         {TOTAL_KEYS.map((key) => (
           <Bar key={key} dataKey={key} stackId="a" fill={TYPE_COLORS[key]} barSize={32}
+            isAnimationActive={!disableAnimation}
             shape={(props) => <RoundedBarShape {...props} keys={TOTAL_KEYS} currentKey={key} dataEntry={data[props.index]} />}>
             <LabelList dataKey={key} position="center" fill="#fff" fontSize={T.chartLabel} fontWeight={700} formatter={(v) => (v > 0 ? v : '')} />
             <LabelList dataKey={key} content={(props) => <TotalOnTop {...props} keys={TOTAL_KEYS} currentKey={key} data={data} totalKey="Total" />} />
@@ -56,24 +57,24 @@ function TotalChart({ data, height = 400, goToAssignee }) {
   );
 }
 
-export default function TeamPerformance({ data, slideRef, goToAssignee }) {
+export default function TeamPerformance({ data, slideRef, goToAssignee, isExporting = false }) {
   return (
     <SlideLayout title="Team Performance" subtitle="All Assignees — Planned vs Unplanned" slideRef={slideRef}>
       <div className="flex gap-4 h-full">
         <div className="card flex flex-col animate-slide-up animate-delay-1" style={{ padding: '16px 20px 12px', flex: 1.1 }}>
           <h2 className="font-semibold" style={{ fontSize: T.section, color: '#0F172A', margin: '0 0 1px 4px', letterSpacing: '-0.01em' }}>Total by Assignee</h2>
           <p style={{ fontSize: T.desc, color: '#94A3B8', margin: '0 0 2px 4px', fontWeight: 500 }}>Planned + Unplanned</p>
-          <div className="flex-1 min-h-0"><TotalChart data={data.teamTotal} height="100%" goToAssignee={goToAssignee} /></div>
+          <div className="flex-1 min-h-0"><TotalChart data={data.teamTotal} height="100%" goToAssignee={goToAssignee} disableAnimation={isExporting} /></div>
         </div>
         <div className="card flex-1 flex flex-col animate-slide-up animate-delay-2" style={{ padding: '16px 20px 12px' }}>
           <h2 className="font-semibold" style={{ fontSize: T.section, color: '#0F172A', margin: '0 0 1px 4px', letterSpacing: '-0.01em' }}>Planned by Assignee</h2>
           <p style={{ fontSize: T.desc, color: '#94A3B8', margin: '0 0 2px 4px', fontWeight: 500 }}>Story cards per member</p>
-          <div className="flex-1 min-h-0"><StackedBarChart data={data.teamPlanned} height="100%" /></div>
+          <div className="flex-1 min-h-0"><StackedBarChart data={data.teamPlanned} height="100%" disableAnimation={isExporting} /></div>
         </div>
         <div className="card flex-1 flex flex-col animate-slide-up animate-delay-3" style={{ padding: '16px 20px 12px' }}>
           <h2 className="font-semibold" style={{ fontSize: T.section, color: '#0F172A', margin: '0 0 1px 4px', letterSpacing: '-0.01em' }}>Unplanned by Assignee</h2>
           <p style={{ fontSize: T.desc, color: '#94A3B8', margin: '0 0 2px 4px', fontWeight: 500 }}>Task cards per member</p>
-          <div className="flex-1 min-h-0"><StackedBarChart data={data.teamUnplanned} height="100%" /></div>
+          <div className="flex-1 min-h-0"><StackedBarChart data={data.teamUnplanned} height="100%" disableAnimation={isExporting} /></div>
         </div>
       </div>
     </SlideLayout>

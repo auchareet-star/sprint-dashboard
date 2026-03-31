@@ -16,7 +16,7 @@ const BUG_PRIORITY_COLORS = {
 
 const PRIO_KEYS = ['Highest', 'High', 'Medium', 'Low', 'Lowest'];
 
-export default function DefectAnalysis({ data, slideRef }) {
+export default function DefectAnalysis({ data, slideRef, isExporting = false }) {
   const resolutionRate = data.totalBugs > 0 ? Math.round((data.bugsDone / data.totalBugs) * 100) : 0;
 
   return (
@@ -139,6 +139,7 @@ export default function DefectAnalysis({ data, slideRef }) {
                   <Legend wrapperStyle={{ fontSize: T.chartLegend, fontWeight: 600, paddingTop: 8, color: '#475569' }} iconType="circle" iconSize={8} />
                   {PRIO_KEYS.map((pk) => (
                     <Bar key={pk} dataKey={pk} stackId="a" fill={BUG_PRIORITY_COLORS[pk] || '#94A3B8'} barSize={32}
+                      isAnimationActive={!isExporting}
                       shape={(props) => <RoundedBarShape {...props} keys={PRIO_KEYS} currentKey={pk} dataEntry={(data.bugStatusByPriority || [])[props.index] || {}} />}
                     >
                       <LabelList dataKey={pk} position="center" fill="#fff" fontSize={T.chartLabel} fontWeight={700} formatter={(v) => (v > 0 ? v : '')} />
@@ -172,6 +173,7 @@ export default function DefectAnalysis({ data, slideRef }) {
                 innerRadius={75}
                 outerRadius={135}
                 centerLabel="Bugs"
+                disableAnimation={isExporting}
               />
             </div>
           </div>
@@ -214,7 +216,7 @@ export default function DefectAnalysis({ data, slideRef }) {
                     tickLine={false}
                   />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="count" fill="#F43F5E" radius={[0, 6, 6, 0]} barSize={32}>
+                  <Bar dataKey="count" fill="#F43F5E" radius={[0, 6, 6, 0]} barSize={32} isAnimationActive={!isExporting}>
                     <LabelList dataKey="count" position="right" fontSize={12} fontWeight={700} fill="#475569" />
                   </Bar>
                 </BarChart>

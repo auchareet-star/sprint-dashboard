@@ -2,7 +2,7 @@ import { T } from '../utils/typography';
 import SlideLayout from '../components/SlideLayout';
 import GroupedBarChart from '../charts/GroupedBarChart';
 
-export default function EffortGap({ data, slideRef }) {
+export default function EffortGap({ data, slideRef, isExporting = false }) {
   const totalEst = data.effortGapDone.Estimate + data.effortGapTodo.Estimate;
   const totalAct = data.effortGapDone.Actual + data.effortGapTodo.Actual;
   const totalGap = totalAct - totalEst;
@@ -117,7 +117,7 @@ export default function EffortGap({ data, slideRef }) {
             Man-days variance per team member
           </p>
           <div className="flex-1 min-h-0">
-            <GroupedBarChart data={data.effortGapByAssignee} dataKeyX="assignee" height="100%" />
+            <GroupedBarChart data={data.effortGapByAssignee} dataKeyX="assignee" height="100%" disableAnimation={isExporting} />
           </div>
         </div>
       </div>

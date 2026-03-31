@@ -17,7 +17,7 @@ const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, valu
   );
 };
 
-export default function DonutChart({ data, colorMap, width = '100%', height = 340, innerRadius = 80, outerRadius = 130, centerLabel = 'Total' }) {
+export default function DonutChart({ data, colorMap, width = '100%', height = 340, innerRadius = 80, outerRadius = 130, centerLabel = 'Total', disableAnimation = false }) {
   const getColor = (name) => (colorMap ? colorMap[name] : getStatusColor(name)) || '#94A3B8';
   const total = data.reduce((s, d) => s + d.value, 0);
 
@@ -25,7 +25,7 @@ export default function DonutChart({ data, colorMap, width = '100%', height = 34
     <ResponsiveContainer width={width} height={height}>
       <PieChart>
         <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="46%"
-          innerRadius={innerRadius} outerRadius={outerRadius} paddingAngle={3} labelLine={false} label={renderLabel} strokeWidth={0}>
+          innerRadius={innerRadius} outerRadius={outerRadius} paddingAngle={3} labelLine={false} label={renderLabel} strokeWidth={0} isAnimationActive={!disableAnimation}>
           {data.map((entry, index) => (
             <Cell key={index} fill={getColor(entry.name)} stroke="none" />
           ))}

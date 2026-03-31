@@ -73,6 +73,30 @@ html, body, #root {
 .animate-delay-3 { animation-delay: 0.24s; opacity: 0; }
 .animate-delay-4 { animation-delay: 0.32s; opacity: 0; }
 
+body[data-exporting="true"] *,
+body[data-exporting="true"] *::before,
+body[data-exporting="true"] *::after,
+.slide[data-exporting="true"] *,
+.slide[data-exporting="true"] *::before,
+.slide[data-exporting="true"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+body[data-exporting="true"] .animate-delay-1,
+body[data-exporting="true"] .animate-delay-2,
+body[data-exporting="true"] .animate-delay-3,
+body[data-exporting="true"] .animate-delay-4,
+body[data-exporting="true"] .animate-slide-up,
+.slide[data-exporting="true"] .animate-delay-1,
+.slide[data-exporting="true"] .animate-delay-2,
+.slide[data-exporting="true"] .animate-delay-3,
+.slide[data-exporting="true"] .animate-delay-4,
+.slide[data-exporting="true"] .animate-slide-up {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 /* Premium tooltip */
 .recharts-tooltip-wrapper {
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
