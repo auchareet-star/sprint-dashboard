@@ -1,10 +1,18 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { toPng } from 'html-to-image';
 import { T } from '../utils/typography';
+import { isValidElement } from 'react';
 
 const LOGO_URL = import.meta.env.BASE_URL + 'ayodia-logo.png';
 
 export default function SlideLayout({ title, subtitle, children, slideRef, isExporting = false }) {
+  const subtitleStyle = {
+    fontSize: T.subtitle,
+    color: '#94A3B8',
+    fontWeight: 500,
+    letterSpacing: '-0.01em',
+  };
+
   return (
     <div
       ref={slideRef}
@@ -46,17 +54,15 @@ export default function SlideLayout({ title, subtitle, children, slideRef, isExp
               }}
             />
             {subtitle && (
-              <p
-                className="mt-2"
-                style={{
-                  fontSize: T.subtitle,
-                  color: '#94A3B8',
-                  fontWeight: 500,
-                  letterSpacing: '-0.01em',
-                }}
-              >
-                {subtitle}
-              </p>
+              isValidElement(subtitle) ? (
+                <div className="mt-3" style={subtitleStyle}>
+                  {subtitle}
+                </div>
+              ) : (
+                <p className="mt-2" style={subtitleStyle}>
+                  {subtitle}
+                </p>
+              )
             )}
           </div>
 
