@@ -51,7 +51,7 @@ function countEpicLines(epic) {
   return lines;
 }
 
-const MAX_LINES_PER_COL = 26;
+const MAX_LINES_PER_COL = 18;
 const MAX_COLS = 3;
 
 function splitIntoColumns(tree) {
@@ -73,8 +73,13 @@ function splitIntoColumns(tree) {
     for (let i = 0; i < remaining.length; i++) {
       const lines = countEpicLines(remaining[i]);
       if (colLines + lines > targetPerCol && colLines > 0) {
-        splitIdx = i;
-        break;
+        // Pick whichever side is closer to the target
+        const diffWithout = Math.abs(colLines - targetPerCol);
+        const diffWith = Math.abs(colLines + lines - targetPerCol);
+        if (diffWithout <= diffWith) {
+          splitIdx = i;
+          break;
+        }
       }
       colLines += lines;
       splitIdx = i + 1;
