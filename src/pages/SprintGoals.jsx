@@ -51,34 +51,40 @@ function countEpicLines(epic) {
   return lines;
 }
 
-const MAX_LINES_SINGLE = 26;
+const MAX_LINES_PER_COL = 26;
+const MAX_COLS = 3;
 
 function splitIntoColumns(tree) {
   const totalLines = tree.reduce((sum, e) => sum + countEpicLines(e), 0);
 
-  if (totalLines <= MAX_LINES_SINGLE) {
-    return { left: tree, right: [], twoCol: false };
+  if (totalLines <= MAX_LINES_PER_COL) {
+    return [tree];
   }
 
-  const half = totalLines / 2;
-  let leftLines = 0;
-  let splitIdx = 0;
+  const numCols = Math.min(Math.ceil(totalLines / MAX_LINES_PER_COL), MAX_COLS);
+  const targetPerCol = totalLines / numCols;
 
-  for (let i = 0; i < tree.length; i++) {
-    const lines = countEpicLines(tree[i]);
-    if (leftLines + lines > half && leftLines > 0) {
-      splitIdx = i;
-      break;
+  const columns = [];
+  let remaining = [...tree];
+
+  for (let col = 0; col < numCols - 1 && remaining.length > 0; col++) {
+    let colLines = 0;
+    let splitIdx = 0;
+    for (let i = 0; i < remaining.length; i++) {
+      const lines = countEpicLines(remaining[i]);
+      if (colLines + lines > targetPerCol && colLines > 0) {
+        splitIdx = i;
+        break;
+      }
+      colLines += lines;
+      splitIdx = i + 1;
     }
-    leftLines += lines;
-    splitIdx = i + 1;
+    columns.push(remaining.slice(0, splitIdx));
+    remaining = remaining.slice(splitIdx);
   }
 
-  return {
-    left: tree.slice(0, splitIdx),
-    right: tree.slice(splitIdx),
-    twoCol: true,
-  };
+  if (remaining.length > 0) columns.push(remaining);
+  return columns;
 }
 
 export default function SprintGoals({ data, slideRef }) {
@@ -135,19 +141,21 @@ export function SprintGoalsView({ goals: goalsInput, title, slideRef }) {
           </div>
         )}
 
-        {/* Tree — single or two columns */}
-        {columns.twoCol ? (
-          <div className="flex-1 min-h-0 flex gap-5">
-            <div style={{ flex: 1 }}>
-              <EpicList epics={columns.left} offset={0} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <EpicList epics={columns.right} offset={columns.left.length} />
-            </div>
+        {/* Tree — 1, 2, or 3 columns depending on content */}
+        {columns.length === 1 ? (
+          <div className="flex-1 min-h-0">
+            <EpicList epics={columns[0]} offset={0} />
           </div>
         ) : (
-          <div className="flex-1 min-h-0">
-            <EpicList epics={columns.left} offset={0} />
+          <div className="flex-1 min-h-0 flex gap-5">
+            {columns.map((col, ci) => {
+              const offset = columns.slice(0, ci).reduce((s, c) => s + c.length, 0);
+              return (
+                <div key={ci} style={{ flex: 1 }}>
+                  <EpicList epics={col} offset={offset} />
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
