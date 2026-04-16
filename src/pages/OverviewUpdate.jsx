@@ -57,9 +57,11 @@ function buildSprints(rows, sprintList) {
   const sprintIndex = {};
   sprints.forEach((s, i) => { sprintIndex[s.name] = i; });
 
-  const currentSprint = sprintList.find((s) => s.active === 'Now')?.name || '';
+  const currentSprints = new Set(
+    sprintList.filter((s) => s.active === 'Now').map((s) => s.name)
+  );
 
-  return { sprints, sprintIndex, currentSprint };
+  return { sprints, sprintIndex, currentSprints };
 }
 
 function buildLanes(tasks, sprintIndex) {
@@ -149,7 +151,7 @@ export default function OverviewUpdate({ data, slideRef }) {
   const sprintListRaw = data.sprintList || [];
   const [page, setPage] = useState(0);
 
-  const { sprints, sprintIndex, currentSprint } = useMemo(
+  const { sprints, sprintIndex, currentSprints } = useMemo(
     () => buildSprints(rows, sprintListRaw),
     [rows, sprintListRaw],
   );
@@ -269,7 +271,7 @@ export default function OverviewUpdate({ data, slideRef }) {
                   Modules /<br />Features
                 </th>
                 {sprints.map((sp) => {
-                  const isCurrent = sp.name === currentSprint;
+                  const isCurrent = currentSprints.has(sp.name);
                   const isNext = sp.active === 'Next';
                   return (
                     <th
@@ -357,7 +359,7 @@ export default function OverviewUpdate({ data, slideRef }) {
                           return Array.from({ length: cell.colSpan }, (_, j) => {
                             const idx = getCellSprintIdx(cells, ci, j);
                             const spObj = sprints[idx];
-                            const isCur = spObj?.name === currentSprint;
+                            const isCur = currentSprints.has(spObj?.name);
                             return (
                               <td
                                 key={`e-${ci}-${j}`}
