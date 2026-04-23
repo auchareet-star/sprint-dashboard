@@ -121,7 +121,7 @@ function getCellSprintIdx(cells, cellIdx, subIdx) {
 }
 
 /** Max table body rows per page */
-const MAX_ROWS = 28;
+const MAX_ROWS = 18;
 
 /**
  * Split modules into pages so each page has ≤ MAX_ROWS lanes total.
@@ -392,26 +392,21 @@ export default function OverviewUpdate({ data, slideRef }) {
                                 padding: '3px 6px',
                                 borderRadius: 4,
                                 textAlign: 'center',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
+                                wordBreak: 'break-word',
                                 lineHeight: '18px',
                               }}
-                              title={`${cell.task}${cell.notes ? ` — ${cell.notes}` : ''}`}
                             >
                               {cell.task}
                             </div>
                             {cell.notes && (
                               <div
                                 style={{
-                                  fontSize: 10,
+                                  fontSize: T.caption,
                                   fontWeight: 500,
                                   color: '#F43F5E',
                                   textAlign: 'center',
                                   marginTop: 1,
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap',
+                                  wordBreak: 'break-word',
                                   lineHeight: '13px',
                                 }}
                               >

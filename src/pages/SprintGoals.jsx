@@ -51,45 +51,53 @@ function countEpicLines(epic) {
   return lines;
 }
 
-const MAX_LINES_PER_COL = 18;
-const MAX_COLS = 3;
+const MAX_LINES_PER_COL = 11;
+const MAX_COLS = 4;
 
 function splitIntoColumns(tree) {
   const totalLines = tree.reduce((sum, e) => sum + countEpicLines(e), 0);
 
-  if (totalLines <= MAX_LINES_PER_COL) {
-    return [tree];
-  }
+  if (totalLines <= MAX_LINES_PER_COL) return [tree];
 
   const numCols = Math.min(Math.ceil(totalLines / MAX_LINES_PER_COL), MAX_COLS);
-  const targetPerCol = totalLines / numCols;
+  if (numCols === 1) return [tree];
 
-  const columns = [];
-  let remaining = [...tree];
+  const epicLines = tree.map(countEpicLines);
+  const n = epicLines.length;
 
-  for (let col = 0; col < numCols - 1 && remaining.length > 0; col++) {
-    let colLines = 0;
-    let splitIdx = 0;
-    for (let i = 0; i < remaining.length; i++) {
-      const lines = countEpicLines(remaining[i]);
-      if (colLines + lines > targetPerCol && colLines > 0) {
-        // Pick whichever side is closer to the target
-        const diffWithout = Math.abs(colLines - targetPerCol);
-        const diffWith = Math.abs(colLines + lines - targetPerCol);
-        if (diffWithout <= diffWith) {
-          splitIdx = i;
-          break;
+  // Prefix sums
+  const prefix = [0];
+  for (const l of epicLines) prefix.push(prefix[prefix.length - 1] + l);
+
+  // DP: dp[i][j] = min possible max-column-load for first i epics in j columns
+  const INF = Infinity;
+  const dp = Array.from({ length: n + 1 }, () => Array(numCols + 1).fill(INF));
+  const from = Array.from({ length: n + 1 }, () => Array(numCols + 1).fill(0));
+  dp[0][0] = 0;
+  for (let j = 1; j <= numCols; j++) {
+    for (let i = j; i <= n; i++) {
+      for (let s = j - 1; s < i; s++) {
+        if (dp[s][j - 1] === INF) continue;
+        const load = prefix[i] - prefix[s];
+        const val = Math.max(dp[s][j - 1], load);
+        if (val < dp[i][j]) {
+          dp[i][j] = val;
+          from[i][j] = s;
         }
       }
-      colLines += lines;
-      splitIdx = i + 1;
     }
-    columns.push(remaining.slice(0, splitIdx));
-    remaining = remaining.slice(splitIdx);
   }
 
-  if (remaining.length > 0) columns.push(remaining);
-  return columns;
+  // Reconstruct column start indices
+  const starts = [];
+  let i = n, j = numCols;
+  while (j > 0) {
+    starts.unshift(from[i][j]);
+    i = from[i][j];
+    j--;
+  }
+
+  return starts.map((start, ci) => tree.slice(start, starts[ci + 1] ?? n));
 }
 
 export default function SprintGoals({ data, slideRef }) {
