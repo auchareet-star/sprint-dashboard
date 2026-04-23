@@ -5,6 +5,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, LabelList,
 } from 'recharts';
 import { WrapTick, RoundedBarShape, TotalOnTop } from '../charts/chartUtils';
+import { STATUS_COLORS, STATUS_ORDER } from '../utils/colors';
 
 const BUG_PRIORITY_COLORS = {
   Highest: '#991B1B',
@@ -216,9 +217,15 @@ export default function DefectAnalysis({ data, slideRef, isExporting = false }) 
                     tickLine={false}
                   />
                   <Tooltip contentStyle={tooltipStyle} />
-                  <Bar dataKey="count" fill="#F43F5E" radius={[0, 6, 6, 0]} barSize={32} isAnimationActive={!isExporting}>
-                    <LabelList dataKey="count" position="right" fontSize={12} fontWeight={700} fill="#475569" />
-                  </Bar>
+                  <Legend wrapperStyle={{ fontSize: T.chartLegend, fontWeight: 600, paddingTop: 8, color: '#475569' }} iconType="circle" iconSize={8} />
+                  {STATUS_ORDER.filter((s) => (data.bugsByAssignee || []).some((r) => r[s] > 0)).map((s, si, arr) => (
+                    <Bar key={s} dataKey={s} stackId="a" fill={STATUS_COLORS[s] || '#94A3B8'} barSize={28} isAnimationActive={!isExporting}
+                      shape={(props) => <RoundedBarShape {...props} keys={arr} currentKey={s} dataEntry={(data.bugsByAssignee || [])[props.index] || {}} />}
+                    >
+                      <LabelList dataKey={s} position="center" fill="#fff" fontSize={T.chartLabel} fontWeight={700} formatter={(v) => (v > 0 ? v : '')} />
+                      <LabelList dataKey={s} content={(props) => <TotalOnTop {...props} keys={arr} currentKey={s} data={data.bugsByAssignee || []} />} />
+                    </Bar>
+                  ))}
                 </BarChart>
               </ResponsiveContainer>
             </div>

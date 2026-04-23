@@ -137,14 +137,20 @@ export function useProcessedData(cards, bugs) {
       })
       .filter((r) => r._total > 0);
 
-    // Bugs by assignee
+    // Bugs by assignee (with per-status breakdown)
     const bugAssigneeCounts = {};
     bugs.forEach((b) => {
       const a = b.assignee || 'Unassigned';
       bugAssigneeCounts[a] = (bugAssigneeCounts[a] || 0) + 1;
     });
     const bugsByAssignee = Object.entries(bugAssigneeCounts)
-      .map(([assignee, count]) => ({ assignee, count }))
+      .map(([assignee, count]) => {
+        const row = { assignee, count };
+        STATUS_ORDER.forEach((s) => {
+          row[s] = bugs.filter((b) => (b.assignee || 'Unassigned') === assignee && b.status === s).length;
+        });
+        return row;
+      })
       .sort((a, b) => b.count - a.count);
 
     return {
