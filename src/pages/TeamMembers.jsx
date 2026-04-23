@@ -56,7 +56,7 @@ export default function TeamMembers({ data, slideRef }) {
 }
 
 function MemberCard({ member }) {
-  const { name, role, estimate, actual, ot = 0, leave = 0 } = member;
+  const { name, role, estimate, actual, ot = 0, leave = 0, remark = '' } = member;
   const initials = getInitials(name);
   const roleColor = ROLE_COLORS[role] || '#64748B';
 
@@ -87,20 +87,15 @@ function MemberCard({ member }) {
       </div>
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          style={{
-            fontSize: T.bodyLg,
-            fontWeight: 700,
-            color: '#0F172A',
-            lineHeight: 1.25,
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            wordBreak: 'break-word',
-          }}
-        >
-          Name: {name}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: T.bodyLg, fontWeight: 700, color: '#0F172A', lineHeight: 1.25, wordBreak: 'break-word' }}>
+            Name: {name}
+          </span>
+          {remark && (
+            <span style={{ fontSize: T.bodySm, fontWeight: 500, color: '#475569', background: '#F1F5F9', border: '1px solid #CBD5E1', borderRadius: 6, padding: '1px 8px', whiteSpace: 'nowrap' }}>
+              {remark}
+            </span>
+          )}
         </div>
         <div style={{ fontSize: T.body, color: '#64748B', fontWeight: 500, marginTop: 2 }}>
           Role: {role}

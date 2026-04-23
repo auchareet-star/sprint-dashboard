@@ -119,6 +119,7 @@ export async function fetchTeamMembers() {
     actual: parseFloat(r['Effort (Act)'] ?? r.actual) || 0,
     ot: parseFloat(r['Effort (OT)'] ?? r.ot) || 0,
     leave: parseFloat(r.Leave ?? r.leave) || 0,
+    remark: r['Remark'] ?? r.remark ?? '',
   })).filter((m) => m.name);
 }
 
