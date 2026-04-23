@@ -203,7 +203,7 @@ export default function OverviewUpdate({ data, slideRef }) {
     ? `Overview Update — ${page + 1}/${totalPages}`
     : 'Overview Update ';
 
-  let globalRowIdx = 0;
+  let moduleIdx = 0;
 
   return (
     <SlideLayout title={pageTitle} slideRef={slideRef}>
@@ -297,9 +297,8 @@ export default function OverviewUpdate({ data, slideRef }) {
                 const remarks = moduleRemarks[mod] || [];
                 const isRemarkOnly = lanes.length === 0 && remarks.length > 0;
                 const laneCount = Math.max(lanes.length, 1);
-                const modRowIdx = globalRowIdx;
-                globalRowIdx += laneCount;
-                const isEven = modRowIdx % 2 === 0;
+                const isEven = moduleIdx % 2 === 0;
+                moduleIdx++;
 
                 // Remark-only module: show remark spanning all sprint columns
                 if (isRemarkOnly) {
