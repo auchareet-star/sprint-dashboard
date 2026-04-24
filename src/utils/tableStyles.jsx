@@ -12,7 +12,7 @@ export const STATUS_BADGE = {
   'Waiting for test': { bg: '#FFF7ED', color: '#D97706' },
   'Test Failed': { bg: '#FEF2F2', color: '#F43F5E' },
   'Wait for Deploy': { bg: '#EEF2FF', color: '#6366F1' },
-  Done: { bg: '#ECFDF5', color: '#0D9488' },
+  Done: { bg: '#DBEAFE', color: '#1E3A5F' },
   Cancel: { bg: '#FEF2F2', color: '#F43F5E' },
 };
 
