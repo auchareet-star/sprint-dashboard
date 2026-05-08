@@ -11,6 +11,8 @@ import EffortOverview from './EffortOverview';
 import TeamPerformance from './TeamPerformance';
 import EffortGap from './EffortGap';
 import DefectAnalysis from './DefectAnalysis';
+import MAAnalysis from './MAAnalysis';
+import MATimeline from './MATimeline';
 import { CardInSprintAssignee, CardInSprintBugs } from './CardInSprint';
 import Retrospective from './Retrospective';
 import IssuesEncountered from './IssuesEncountered';
@@ -28,6 +30,8 @@ const STATIC_PRESENT = [
   { id: 'team', label: 'Team Performance', Component: TeamPerformance },
   { id: 'gap', label: 'Effort Gap', Component: EffortGap },
   { id: 'defects', label: 'Defect Analysis', Component: DefectAnalysis },
+  { id: 'ma-analysis', label: 'MA Analysis', Component: MAAnalysis },
+  { id: 'ma-timeline', label: 'MA Timeline', Component: MATimeline },
   '__CARDS__',
   { id: 'card-bugs', label: 'Card in Sprint: Bug', Component: CardInSprintBugs },
   { id: 'retro', label: 'Retrospective', Component: Retrospective },

@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { rawAll, rawBugs } from '../data/sampleData';
-import { fetchAllCards, fetchBugs, fetchTeamMembers, fetchSprintGoals, fetchNextSprintGoals, fetchOverviewUpdate, fetchSprintList, fetchIssuesEncountered, resolveSprintDates, isGoogleSheetsConfigured } from '../data/googleSheets';
+import { fetchAllCards, fetchBugs, fetchMAIssues, fetchTeamMembers, fetchSprintGoals, fetchNextSprintGoals, fetchOverviewUpdate, fetchSprintList, fetchIssuesEncountered, resolveSprintDates, isGoogleSheetsConfigured } from '../data/googleSheets';
 
 export function useData() {
   const [cards, setCards] = useState(rawAll);
   const [bugs, setBugs] = useState(rawBugs);
+  const [maIssues, setMaIssues] = useState([]);
   const [team, setTeam] = useState([]);
   const [sprintGoals, setSprintGoals] = useState({ meta: {}, items: [] });
   const [nextSprintGoals, setNextSprintGoals] = useState({ meta: {}, items: [] });
@@ -30,6 +31,10 @@ export function useData() {
       .then((b) => { console.log('Bugs loaded:', b.length); setBugs(b); bugsOk = true; })
       .catch((err) => { console.warn('fetchBugs failed:', err); });
 
+    const loadMAIssues = fetchMAIssues()
+      .then((m) => { console.log('MA Issues loaded:', m.length); setMaIssues(m); })
+      .catch((err) => console.warn('fetchMAIssues failed:', err));
+
     const loadTeam = fetchTeamMembers()
       .then((t) => { console.log('Team loaded:', t.length); setTeam(t); })
       .catch((err) => console.warn('fetchTeamMembers failed:', err));
@@ -54,7 +59,7 @@ export function useData() {
       .then((s) => { console.log('Sprint list loaded:', s.length); setSprintList(s); })
       .catch((err) => console.warn('fetchSprintList failed:', err));
 
-    Promise.all([loadCards, loadBugs, loadTeam, loadGoals, loadNextGoals, loadIssues, loadOverview, loadSprintList]).finally(() => {
+    Promise.all([loadCards, loadBugs, loadMAIssues, loadTeam, loadGoals, loadNextGoals, loadIssues, loadOverview, loadSprintList]).finally(() => {
       setSource(cardsOk || bugsOk ? 'google' : 'sample');
       setLoading(false);
     });
@@ -64,5 +69,5 @@ export function useData() {
   const resolvedGoals = useMemo(() => resolveSprintDates(sprintGoals, sprintList), [sprintGoals, sprintList]);
   const resolvedNextGoals = useMemo(() => resolveSprintDates(nextSprintGoals, sprintList), [nextSprintGoals, sprintList]);
 
-  return { cards, bugs, team, sprintGoals: resolvedGoals, nextSprintGoals: resolvedNextGoals, issues, overviewUpdate, sprintList, loading, source };
+  return { cards, bugs, maIssues, team, sprintGoals: resolvedGoals, nextSprintGoals: resolvedNextGoals, issues, overviewUpdate, sprintList, loading, source };
 }

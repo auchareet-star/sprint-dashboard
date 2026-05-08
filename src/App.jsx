@@ -14,6 +14,9 @@ import SprintGoals from './pages/SprintGoals';
 import OverviewUpdate from './pages/OverviewUpdate';
 import NextSprintGoals from './pages/NextSprintGoals';
 import IssuesEncountered from './pages/IssuesEncountered';
+import SprintInsights from './pages/SprintInsights';
+import MAAnalysis from './pages/MAAnalysis';
+import MATimeline from './pages/MATimeline';
 import PresentMode from './pages/PresentMode';
 
 const SLIDES = [
@@ -25,6 +28,9 @@ const SLIDES = [
   { id: 'team', label: 'Team Performance', Component: TeamPerformance },
   { id: 'gap', label: 'Effort Gap', Component: EffortGap },
   { id: 'defects', label: 'Defect Analysis', Component: DefectAnalysis },
+  { id: 'ma-analysis', label: 'MA Analysis', Component: MAAnalysis },
+  { id: 'ma-timeline', label: 'MA Timeline', Component: MATimeline },
+  { id: 'insights', label: 'Sprint Insights', Component: SprintInsights },
   { id: 'issues', label: 'Issues Encountered', Component: IssuesEncountered },
   { id: 'next-goals', label: 'Next Sprint Goals', Component: NextSprintGoals },
 ];
@@ -152,9 +158,9 @@ function BugListNav({ assigneeList, goToAssignee, slideRef }) {
 export default function App() {
   const [showAssigneeMenu, setShowAssigneeMenu] = useState(false);
   const slideRef = useRef(null);
-  const { cards, bugs, team, sprintGoals, nextSprintGoals, issues, overviewUpdate, sprintList, loading, source } = useData();
+  const { cards, bugs, maIssues, team, sprintGoals, nextSprintGoals, issues, overviewUpdate, sprintList, loading, source } = useData();
   const processed = useProcessedData(cards, bugs);
-  const data = { ...processed, team, sprintGoals, nextSprintGoals, issues, overviewUpdate, sprintList };
+  const data = { ...processed, team, sprintGoals, nextSprintGoals, issues, overviewUpdate, sprintList, maIssues };
 
   const [route, setRoute] = useState(() => parseHash(SLIDES));
 

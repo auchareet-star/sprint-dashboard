@@ -6,6 +6,8 @@ import HorizontalStackedBar from '../charts/HorizontalStackedBar';
 export default function ExecutiveSummary({ data, slideRef, isExporting = false }) {
   const pctPlanned = data.total > 0 ? Math.round((data.plannedCount / data.total) * 100) : 0;
   const isHighUnplanned = data.pctUnplanned > 30;
+  const plannedDonePct = data.completionByType?.planned?.pct ?? 0;
+  const unplannedDonePct = data.completionByType?.unplanned?.pct ?? 0;
 
   return (
     <SlideLayout title="Executive Summary" subtitle="Sprint Overview" slideRef={slideRef} isExporting={isExporting}>
@@ -54,10 +56,19 @@ export default function ExecutiveSummary({ data, slideRef, isExporting = false }
                 isExporting={isExporting}
               />
               <InsightRow
-                label="Planned Ratio"
-                value={`${pctPlanned}%`}
+                label="Planned Done"
+                value={`${plannedDonePct}%`}
                 color="#1E3A5F"
-                bar={pctPlanned}
+                bar={plannedDonePct}
+                sub={`${data.completionByType?.planned?.done ?? 0} / ${data.completionByType?.planned?.total ?? 0}`}
+                isExporting={isExporting}
+              />
+              <InsightRow
+                label="Unplanned Done"
+                value={`${unplannedDonePct}%`}
+                color="#F59E0B"
+                bar={unplannedDonePct}
+                sub={`${data.completionByType?.unplanned?.done ?? 0} / ${data.completionByType?.unplanned?.total ?? 0}`}
                 isExporting={isExporting}
               />
               <InsightRow
@@ -117,11 +128,14 @@ export default function ExecutiveSummary({ data, slideRef, isExporting = false }
   );
 }
 
-function InsightRow({ label, value, color, bar, isExporting = false }) {
+function InsightRow({ label, value, color, bar, sub, isExporting = false }) {
   return (
     <div>
       <div className="flex items-center justify-between" style={{ marginBottom: 3 }}>
-        <span style={{ fontSize: T.label, color: '#64748B', fontWeight: 500 }}>{label}</span>
+        <div>
+          <span style={{ fontSize: T.label, color: '#64748B', fontWeight: 500 }}>{label}</span>
+          {sub && <span style={{ fontSize: T.micro, color: '#94A3B8', fontWeight: 500, marginLeft: 6 }}>{sub}</span>}
+        </div>
         <span className="font-bold" style={{ fontSize: T.label, color, letterSpacing: '-0.02em' }}>{value}</span>
       </div>
       {bar != null && (

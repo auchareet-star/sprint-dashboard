@@ -48,9 +48,11 @@ function buildSprints(rows, sprintList) {
     for (let i = s; i <= e; i++) usedSprints.add(i);
   });
 
-  const sprints = sprintList
+  const allSprints = sprintList
     .filter((s) => usedSprints.has(sprintNum(s.name)))
     .sort((a, b) => sprintNum(a.name) - sprintNum(b.name));
+
+  const sprints = allSprints.slice(-10);
 
   if (sprints.length === 0) return { sprints: [], sprintIndex: {}, currentSprint: '' };
 

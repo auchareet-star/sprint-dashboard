@@ -67,10 +67,9 @@ export function useProcessedData(cards, bugs) {
 
     // Effort gap
     const COMPLETED_STATUSES = ['Done', 'Wait for Deploy', 'Waiting for Test', 'Cancel'];
-    const IN_PROGRESS_STATUSES = ['To Do', 'In Progress', 'Test Failed'];
 
     const completedCards = cards.filter((c) => COMPLETED_STATUSES.includes(c.status));
-    const inProgressCards = cards.filter((c) => IN_PROGRESS_STATUSES.includes(c.status));
+    const inProgressCards = cards.filter((c) => !COMPLETED_STATUSES.includes(c.status));
 
     const effortGapDone = {
       label: 'Done / Deploy / Test / Cancel',
@@ -81,7 +80,7 @@ export function useProcessedData(cards, bugs) {
     effortGapDone.overrun = effortGapDone.gap > 0;
 
     const effortGapTodo = {
-      label: 'To Do / In Progress / Test Failed',
+      label: 'Active (non-completed)',
       Estimate: inProgressCards.reduce((s, c) => s + c.estimate, 0),
       Actual: inProgressCards.reduce((s, c) => s + c.actual, 0),
     };
@@ -153,6 +152,61 @@ export function useProcessedData(cards, bugs) {
       })
       .sort((a, b) => b.count - a.count);
 
+    // ── Sprint Insights ──────────────────────────────────────────────────────
+
+    // 1. Estimate Accuracy per assignee (sorted by absolute variance desc)
+    const estimateAccuracy = topAssignees
+      .map((name) => {
+        const ac = cards.filter((c) => c.assignee === name && c.estimate > 0);
+        if (ac.length === 0) return null;
+        const est = parseFloat(ac.reduce((s, c) => s + c.estimate, 0).toFixed(2));
+        const act = parseFloat(ac.reduce((s, c) => s + c.actual, 0).toFixed(2));
+        return { assignee: name, estimate: est, actual: act, variance: parseFloat((act - est).toFixed(2)) };
+      })
+      .filter(Boolean)
+      .sort((a, b) => Math.abs(b.variance) - Math.abs(a.variance));
+
+    // 2. Planned vs Unplanned completion rate
+    const plannedDone = planned.filter((c) => c.status === 'Done').length;
+    const unplannedDone = unplanned.filter((c) => c.status === 'Done').length;
+    const completionByType = {
+      planned: { total: planned.length, done: plannedDone, pct: planned.length > 0 ? Math.round(plannedDone / planned.length * 100) : 0 },
+      unplanned: { total: unplanned.length, done: unplannedDone, pct: unplanned.length > 0 ? Math.round(unplannedDone / unplanned.length * 100) : 0 },
+    };
+
+    // 3. Priority vs Completion
+    const completionByPriority = ['Highest', 'High', 'Medium', 'Low', 'Lowest']
+      .map((priority) => {
+        const pc = cards.filter((c) => c.priority === priority);
+        const done = pc.filter((c) => c.status === 'Done').length;
+        return { priority, total: pc.length, done, pct: pc.length > 0 ? Math.round(done / pc.length * 100) : 0 };
+      })
+      .filter((p) => p.total > 0);
+
+    // 4. Assignee Risk Score
+    const assigneeRisk = topAssignees
+      .map((name) => {
+        const ac = cards.filter((c) => c.assignee === name);
+        const unplannedRatio = ac.length > 0 ? ac.filter((c) => c.type === 'Unplanned').length / ac.length : 0;
+        const est = ac.reduce((s, c) => s + c.estimate, 0);
+        const act = ac.reduce((s, c) => s + c.actual, 0);
+        const overrunRatio = est > 0 ? Math.max(0, (act - est) / est) : 0;
+        const unresolvedBugs = bugs.filter((b) => b.assignee === name && !['Done', 'Cancel'].includes(b.status)).length;
+        const riskScore = Math.min(100, Math.round(
+          Math.min(unplannedRatio, 0.5) / 0.5 * 33 +
+          Math.min(overrunRatio, 0.5) / 0.5 * 33 +
+          Math.min(unresolvedBugs, 5) / 5 * 34
+        ));
+        return {
+          assignee: name,
+          riskScore,
+          unplannedPct: Math.round(unplannedRatio * 100),
+          effortVariance: parseFloat((act - est).toFixed(2)),
+          unresolvedBugs,
+        };
+      })
+      .sort((a, b) => b.riskScore - a.riskScore);
+
     return {
       total,
       plannedCount: planned.length,
@@ -178,6 +232,10 @@ export function useProcessedData(cards, bugs) {
       bugsByAssignee,
       bugPriorityDistribution,
       bugStatusByPriority,
+      estimateAccuracy,
+      completionByType,
+      completionByPriority,
+      assigneeRisk,
     };
   }, [cards, bugs]);
 }

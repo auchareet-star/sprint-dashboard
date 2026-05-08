@@ -110,6 +110,20 @@ export async function fetchBugs() {
   }));
 }
 
+export async function fetchMAIssues() {
+  const rows = await fetchSheet('Raw : MA');
+  return rows.map((r) => ({
+    bug_id: r['Key'] ?? r.bug_id ?? '',
+    parent: r['parent'] ?? r.parent ?? '',
+    summary: r['Summary'] ?? r.summary ?? '',
+    status: r['Status'] ?? r.status ?? '',
+    priority: r['Priority'] ?? r.priority ?? '',
+    assignee: r['Assignee'] ?? r.assignee ?? '',
+    issueType: r['Issue Type'] ?? r['Type'] ?? r.issueType ?? '',
+    created: r['Created'] ?? r.created ?? '',
+  }));
+}
+
 export async function fetchTeamMembers() {
   const rows = await fetchSheet('Team members');
   return rows.map((r) => ({
