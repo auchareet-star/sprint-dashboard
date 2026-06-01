@@ -4,7 +4,7 @@ import { toJpeg } from 'html-to-image';
 import CoverPage from './CoverPage';
 import AgendaPage from './AgendaPage';
 import TeamMembers from './TeamMembers';
-import OverviewUpdate from './OverviewUpdate';
+import OverviewUpdate, { computeOverviewPageCount } from './OverviewUpdate';
 import SprintGoals from './SprintGoals';
 import ExecutiveSummary from './ExecutiveSummary';
 import EffortOverview from './EffortOverview';
@@ -23,7 +23,7 @@ const STATIC_PRESENT = [
   { id: 'cover', label: 'Cover', Component: CoverPage },
   { id: 'agenda', label: 'Agenda', Component: AgendaPage },
   { id: 'members', label: 'Team Members', Component: TeamMembers },
-  { id: 'overview', label: 'Overview Update', Component: OverviewUpdate },
+  '__OVERVIEW__',
   { id: 'goals', label: 'Sprint Goals', Component: SprintGoals },
   { id: 'executive', label: 'Executive Summary', Component: ExecutiveSummary },
   { id: 'effort', label: 'Effort Overview', Component: EffortOverview },
@@ -67,10 +67,19 @@ export default function PresentMode({ data, onExit }) {
       render: (props) => <CardInSprintAssignee data={props.data} slideRef={props.slideRef} assigneeName={name} />,
     }));
 
+    const overviewPageCount = computeOverviewPageCount(data);
+    const overviewSlides = Array.from({ length: overviewPageCount }, (_, i) => ({
+      id: `overview-${i}`,
+      label: overviewPageCount > 1 ? `Overview Update ${i + 1}/${overviewPageCount}` : 'Overview Update',
+      render: (props) => <OverviewUpdate data={props.data} slideRef={props.slideRef} forcePage={i} />,
+    }));
+
     const result = [];
     STATIC_PRESENT.forEach((s) => {
       if (s === '__CARDS__') {
         result.push(...cardSlides);
+      } else if (s === '__OVERVIEW__') {
+        result.push(...overviewSlides);
       } else {
         result.push({
           ...s,
@@ -79,7 +88,7 @@ export default function PresentMode({ data, onExit }) {
       }
     });
     return result;
-  }, [data.cards]);
+  }, [data]);
 
   const total = slides.length;
   const current = Math.min(index, total - 1);

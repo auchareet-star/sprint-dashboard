@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { T } from '../utils/typography';
 import SlideLayout from '../components/SlideLayout';
 
@@ -123,7 +123,7 @@ function getCellSprintIdx(cells, cellIdx, subIdx) {
 }
 
 /** Max table body rows per page */
-const MAX_ROWS = 18;
+export const MAX_ROWS = 18;
 
 /**
  * Split modules into pages so each page has ≤ MAX_ROWS lanes total.
@@ -148,10 +148,30 @@ function paginateModules(moduleOrder, moduleLanes) {
   return pages.length > 0 ? pages : [[]];
 }
 
-export default function OverviewUpdate({ data, slideRef }) {
+/** Compute total page count without rendering — used by PresentMode */
+export function computeOverviewPageCount(data) {
   const rows = data.overviewUpdate || [];
   const sprintListRaw = data.sprintList || [];
-  const [page, setPage] = useState(0);
+  const { sprintIndex } = buildSprints(rows, sprintListRaw);
+  const moduleOrder = [];
+  const moduleMap = {};
+  rows.forEach((r) => {
+    if (!moduleMap[r.module]) { moduleMap[r.module] = []; moduleOrder.push(r.module); }
+    if (r.startSprint) moduleMap[r.module].push(r);
+  });
+  const moduleLanes = {};
+  moduleOrder.forEach((mod) => { moduleLanes[mod] = buildLanes(moduleMap[mod], sprintIndex); });
+  return paginateModules(moduleOrder, moduleLanes).length;
+}
+
+export default function OverviewUpdate({ data, slideRef, forcePage }) {
+  const rows = data.overviewUpdate || [];
+  const sprintListRaw = data.sprintList || [];
+  const [page, setPage] = useState(forcePage ?? 0);
+
+  useEffect(() => {
+    if (forcePage != null) setPage(forcePage);
+  }, [forcePage]);
 
   const { sprints, sprintIndex, currentSprints } = useMemo(
     () => buildSprints(rows, sprintListRaw),
