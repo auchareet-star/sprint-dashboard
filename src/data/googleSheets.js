@@ -3,11 +3,38 @@
 //   1. Public sheet (no API key needed) — sheet must be shared with "Anyone with the link"
 //   2. API key mode — set VITE_GOOGLE_API_KEY for private sheets
 //
-// Set VITE_GOOGLE_SHEET_ID in .env (or it defaults to the project sheet).
+// Sheet ID resolution order: user override (saved in this browser) > VITE_GOOGLE_SHEET_ID env var > built-in default.
 
-const SHEET_ID =
+const DEFAULT_SHEET_ID =
   import.meta.env.VITE_GOOGLE_SHEET_ID ||
   '1QugPau4j0C-0UrIczOpzmUSLYsnwViZRMy03ZeiUgfk';
+
+const SHEET_ID_STORAGE_KEY = 'agile-dashboard:sheetId';
+
+/** Pull the sheet ID out of a pasted URL, or pass a raw ID through unchanged. */
+export function extractSheetId(input) {
+  const trimmed = (input || '').trim();
+  const match = trimmed.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  return match ? match[1] : trimmed;
+}
+
+export function getSheetId() {
+  return localStorage.getItem(SHEET_ID_STORAGE_KEY) || DEFAULT_SHEET_ID;
+}
+
+/** Save a user-chosen sheet (ID or full URL) as an override, or clear it if empty. */
+export function setSheetId(input) {
+  const id = extractSheetId(input);
+  if (id) {
+    localStorage.setItem(SHEET_ID_STORAGE_KEY, id);
+  } else {
+    localStorage.removeItem(SHEET_ID_STORAGE_KEY);
+  }
+}
+
+export function isCustomSheetId() {
+  return Boolean(localStorage.getItem(SHEET_ID_STORAGE_KEY));
+}
 
 const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
 
@@ -17,7 +44,7 @@ const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
  * Fetch via Google Sheets API v4 (requires API key).
  */
 async function fetchSheetApi(sheetName) {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${encodeURIComponent(sheetName)}?key=${API_KEY}`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${getSheetId()}/values/${encodeURIComponent(sheetName)}?key=${API_KEY}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Sheets API error "${sheetName}": ${res.statusText}`);
   const data = await res.json();
@@ -30,7 +57,7 @@ async function fetchSheetApi(sheetName) {
  */
 async function fetchSheetPublic(sheetName) {
   const url =
-    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&headers=1&sheet=${encodeURIComponent(sheetName)}`;
+    `https://docs.google.com/spreadsheets/d/${getSheetId()}/gviz/tq?tqx=out:json&headers=1&sheet=${encodeURIComponent(sheetName)}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Public fetch error "${sheetName}": ${res.statusText}`);
   const text = await res.text();
@@ -224,5 +251,5 @@ export async function fetchIssuesEncountered() {
 }
 
 export function isGoogleSheetsConfigured() {
-  return Boolean(SHEET_ID);
+  return Boolean(getSheetId());
 }

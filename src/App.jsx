@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { SlideContainer, ExportButton, CopyImageButton } from './components/SlideLayout';
+import SheetSettings from './components/SheetSettings';
 import { useData } from './hooks/useData';
 import { useProcessedData } from './hooks/useProcessedData';
 import ExecutiveSummary from './pages/ExecutiveSummary';
@@ -370,6 +371,7 @@ export default function App() {
           </button>
 
           <div className="flex items-center gap-3" style={{ position: 'absolute', right: 16 }}>
+            <SheetSettings />
             <CopyImageButton slideRef={slideRef} />
             <ExportButton slideRef={slideRef} />
           </div>
