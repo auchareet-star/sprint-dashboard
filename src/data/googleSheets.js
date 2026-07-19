@@ -5,6 +5,8 @@
 //
 // Sheet ID resolution order: user override (saved in this browser) > VITE_GOOGLE_SHEET_ID env var > built-in default.
 
+import { normalizeStatus } from '../utils/colors';
+
 const DEFAULT_SHEET_ID =
   import.meta.env.VITE_GOOGLE_SHEET_ID ||
   '1QugPau4j0C-0UrIczOpzmUSLYsnwViZRMy03ZeiUgfk';
@@ -117,7 +119,7 @@ export async function fetchAllCards() {
     parent: r['parent'] ?? r.parent ?? '',
     summary: r['Summary'] ?? r.summary ?? '',
     type: ISSUE_TYPE_MAP[r['Issue Type']] ?? r.type ?? 'Unplanned',
-    status: r['Status'] ?? r.status ?? '',
+    status: normalizeStatus(r['Status'] ?? r.status ?? ''),
     priority: r['Priority'] ?? r.priority ?? '',
     assignee: r['Assignee'] ?? r.assignee ?? '',
     estimate: parseFloat(r['Estimate Man-Days'] ?? r.estimate) || 0,
@@ -131,7 +133,7 @@ export async function fetchBugs() {
     bug_id: r['Key'] ?? r.bug_id ?? '',
     parent: r['parent'] ?? r.parent ?? '',
     summary: r['Summary'] ?? r.summary ?? '',
-    status: r['Status'] ?? r.status ?? '',
+    status: normalizeStatus(r['Status'] ?? r.status ?? ''),
     priority: r['Priority'] ?? r.priority ?? '',
     assignee: r['Assignee'] ?? r.assignee ?? '',
   }));
@@ -143,7 +145,7 @@ export async function fetchMAIssues() {
     bug_id: r['Key'] ?? r.bug_id ?? '',
     parent: r['parent'] ?? r.parent ?? '',
     summary: r['Summary'] ?? r.summary ?? '',
-    status: r['Status'] ?? r.status ?? '',
+    status: normalizeStatus(r['Status'] ?? r.status ?? ''),
     priority: r['Priority'] ?? r.priority ?? '',
     assignee: r['Assignee'] ?? r.assignee ?? '',
     issueType: r['Issue Type'] ?? r['Type'] ?? r.issueType ?? '',

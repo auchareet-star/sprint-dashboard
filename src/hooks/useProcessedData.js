@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { STATUS_ORDER } from '../utils/colors';
+import { STATUS_ORDER, COMPLETED_STATUSES, RESOLVED_STATUSES } from '../utils/colors';
 
 export function useProcessedData(cards, bugs) {
   return useMemo(() => {
@@ -66,13 +66,11 @@ export function useProcessedData(cards, bugs) {
     });
 
     // Effort gap
-    const COMPLETED_STATUSES = ['Done', 'Wait for Deploy', 'Waiting for Test', 'Cancel'];
-
     const completedCards = cards.filter((c) => COMPLETED_STATUSES.includes(c.status));
     const inProgressCards = cards.filter((c) => !COMPLETED_STATUSES.includes(c.status));
 
     const effortGapDone = {
-      label: 'Done / Deploy / Test / Cancel',
+      label: 'Handed off (Review / Test / Deploy / Done)',
       Estimate: completedCards.reduce((s, c) => s + c.estimate, 0),
       Actual: completedCards.reduce((s, c) => s + c.actual, 0),
     };
@@ -97,8 +95,7 @@ export function useProcessedData(cards, bugs) {
 
     // Bugs — count all statuses
     const totalBugs = bugs.length;
-    const BUG_RESOLVED = ['Done', 'Cancel'];
-    const bugsDone = bugs.filter((b) => BUG_RESOLVED.includes(b.status)).length;
+    const bugsDone = bugs.filter((b) => RESOLVED_STATUSES.includes(b.status)).length;
     const bugsTodo = totalBugs - bugsDone;
 
     const bugStatusCounts = {};
@@ -191,7 +188,7 @@ export function useProcessedData(cards, bugs) {
         const est = ac.reduce((s, c) => s + c.estimate, 0);
         const act = ac.reduce((s, c) => s + c.actual, 0);
         const overrunRatio = est > 0 ? Math.max(0, (act - est) / est) : 0;
-        const unresolvedBugs = bugs.filter((b) => b.assignee === name && !['Done', 'Cancel'].includes(b.status)).length;
+        const unresolvedBugs = bugs.filter((b) => b.assignee === name && !RESOLVED_STATUSES.includes(b.status)).length;
         const riskScore = Math.min(100, Math.round(
           Math.min(unplannedRatio, 0.5) / 0.5 * 33 +
           Math.min(overrunRatio, 0.5) / 0.5 * 33 +

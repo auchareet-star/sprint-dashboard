@@ -2,18 +2,36 @@
  * Shared table constants for AssigneeView and BugListView.
  */
 
-export const STATUS_ORDER = ['In Progress', 'To Do', 'Test Failed', 'Waiting for Test', 'Waiting for test', 'Wait for Deploy', 'Done', 'Cancel'];
+// Table sort order: work needing attention first, closed-out work last.
+export const STATUS_ORDER = [
+  'BLOCKED',
+  'REOPENED',
+  'In Progress',
+  'To Do',
+  'In Review',
+  'WAITING FOR DEMO DEPLOY',
+  'WAITING FOR TEST',
+  'TESTING',
+  'USER TEST',
+  'WAITING FOR PROD DEPLOY',
+  'Done',
+  'CANCELLED',
+];
 export const PRIORITY_ORDER = ['Highest', 'High', 'Medium', 'Low', 'Lowest'];
 
 export const STATUS_BADGE = {
   'To Do': { bg: '#F1F5F9', color: '#64748B' },
   'In Progress': { bg: '#ECFDF5', color: '#059669' },
-  'Waiting for Test': { bg: '#FFF7ED', color: '#D97706' },
-  'Waiting for test': { bg: '#FFF7ED', color: '#D97706' },
-  'Test Failed': { bg: '#FEF2F2', color: '#F43F5E' },
-  'Wait for Deploy': { bg: '#EEF2FF', color: '#6366F1' },
+  'In Review': { bg: '#FFF7ED', color: '#D97706' },
+  'WAITING FOR DEMO DEPLOY': { bg: '#F0F9FF', color: '#0284C7' },
+  'WAITING FOR TEST': { bg: '#F5F3FF', color: '#7C3AED' },
+  TESTING: { bg: '#FDF2F8', color: '#DB2777' },
+  'USER TEST': { bg: '#ECFDF5', color: '#047857' },
+  'WAITING FOR PROD DEPLOY': { bg: '#EEF2FF', color: '#6366F1' },
+  REOPENED: { bg: '#FFF7ED', color: '#EA580C' },
+  BLOCKED: { bg: '#FEF2F2', color: '#DC2626' },
+  CANCELLED: { bg: '#F1F5F9', color: '#475569' },
   Done: { bg: '#DBEAFE', color: '#1E3A5F' },
-  Cancel: { bg: '#FEF2F2', color: '#F43F5E' },
 };
 
 export const PRIORITY_BADGE = {

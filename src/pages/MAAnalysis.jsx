@@ -6,7 +6,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid, LabelList,
 } from 'recharts';
 import { WrapTick, RoundedBarShape, TotalOnTop } from '../charts/chartUtils';
-import { STATUS_COLORS, STATUS_ORDER } from '../utils/colors';
+import { STATUS_COLORS, STATUS_ORDER, RESOLVED_STATUSES } from '../utils/colors';
 
 const BUG_PRIORITY_COLORS = {
   Highest: '#991B1B',
@@ -17,7 +17,7 @@ const BUG_PRIORITY_COLORS = {
 };
 
 const PRIO_KEYS = ['Highest', 'High', 'Medium', 'Low', 'Lowest'];
-const BUG_RESOLVED = ['Done', 'Cancel'];
+const BUG_RESOLVED = RESOLVED_STATUSES;
 
 const ISSUE_TYPE_COLORS = {
   Bug:         '#F43F5E',
