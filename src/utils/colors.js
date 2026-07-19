@@ -2,19 +2,34 @@
 
 // Canonical status vocabulary. These 12 values are the only ones the dashboard
 // renders; anything coming off the sheet is folded onto them by normalizeStatus.
+//
+// Status is ordered, not nominal: a card walks To Do -> ... -> Done, so the nine
+// in-flow states take one blue ramp, light -> dark, and the reader sees progress
+// as darkness rather than having to decode nine unrelated hues. The three
+// out-of-flow states are exceptions, not stages, so they leave the ramp entirely
+// and wear reserved status colors that pop against the blue field.
+//
+// Nine ramp steps sit closer than the 0.06 lightness gap an ordinal ramp wants
+// (five steps is the most that clears it on a white surface). That is a deliberate
+// trade for keeping all twelve statuses visible: neighbouring steps are adjacent
+// workflow stages, so reading one as its neighbour costs little, and the bar
+// labels carry exact identity. The pairs that must never be confused — BLOCKED vs
+// REOPENED vs the flow — are the ones held far apart (normal-vision dE 15.7).
 export const STATUS_COLORS = {
-  'To Do': '#94A3B8',
-  'In Progress': '#0D9488',
-  'In Review': '#F59E0B',
-  'WAITING FOR DEMO DEPLOY': '#0EA5E9',
-  'WAITING FOR TEST': '#8B5CF6',
-  TESTING: '#EC4899',
-  'USER TEST': '#059669',
-  'WAITING FOR PROD DEPLOY': '#6366F1',
-  REOPENED: '#EA580C',
-  BLOCKED: '#DC2626',
-  CANCELLED: '#475569',
-  Done: '#1E3A5F',
+  // In-flow — blue ramp, light (not started) to dark (shipped)
+  'To Do': '#86b6ef',
+  'In Progress': '#6da7ec',
+  'In Review': '#5598e7',
+  'WAITING FOR DEMO DEPLOY': '#3987e5',
+  'WAITING FOR TEST': '#2a78d6',
+  TESTING: '#256abf',
+  'USER TEST': '#1c5cab',
+  'WAITING FOR PROD DEPLOY': '#184f95',
+  Done: '#0d366b',
+  // Out-of-flow — reserved status colors, always shown with their text label
+  REOPENED: '#ec835a',
+  BLOCKED: '#d03b3b',
+  CANCELLED: '#898781',
 };
 
 // Legacy / variant spellings kept so older sheets keep rendering. Keys are
@@ -57,7 +72,10 @@ export const EFFORT_COLORS = {
   Actual: '#F59E0B',
 };
 
-// Chart stacking order: finished work at the base, blocked/cancelled on top.
+// Chart stacking order. The nine in-flow statuses stay contiguous and run dark to
+// light from the baseline up, so a stack reads as a gradient with shipped work at
+// the bottom; the three exceptions sit on top where they break the gradient and
+// catch the eye. Reordering these would scramble the gradient — keep flow together.
 export const STATUS_ORDER = [
   'Done',
   'WAITING FOR PROD DEPLOY',

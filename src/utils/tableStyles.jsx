@@ -19,19 +19,22 @@ export const STATUS_ORDER = [
 ];
 export const PRIORITY_ORDER = ['Highest', 'High', 'Medium', 'Low', 'Lowest'];
 
+// Badge tints mirror the chart ramp — in-flow statuses deepen as work advances,
+// exceptions break out into their reserved status colors. Every pair below clears
+// WCAG 4.5:1 body-text contrast against its own tint.
 export const STATUS_BADGE = {
-  'To Do': { bg: '#F1F5F9', color: '#64748B' },
-  'In Progress': { bg: '#ECFDF5', color: '#059669' },
-  'In Review': { bg: '#FFF7ED', color: '#D97706' },
-  'WAITING FOR DEMO DEPLOY': { bg: '#F0F9FF', color: '#0284C7' },
-  'WAITING FOR TEST': { bg: '#F5F3FF', color: '#7C3AED' },
-  TESTING: { bg: '#FDF2F8', color: '#DB2777' },
-  'USER TEST': { bg: '#ECFDF5', color: '#047857' },
-  'WAITING FOR PROD DEPLOY': { bg: '#EEF2FF', color: '#6366F1' },
-  REOPENED: { bg: '#FFF7ED', color: '#EA580C' },
-  BLOCKED: { bg: '#FEF2F2', color: '#DC2626' },
-  CANCELLED: { bg: '#F1F5F9', color: '#475569' },
-  Done: { bg: '#DBEAFE', color: '#1E3A5F' },
+  'To Do': { bg: '#F2F7FE', color: '#1c5cab' },
+  'In Progress': { bg: '#E7F0FD', color: '#1c5cab' },
+  'In Review': { bg: '#DCE9FC', color: '#184f95' },
+  'WAITING FOR DEMO DEPLOY': { bg: '#D1E2FB', color: '#184f95' },
+  'WAITING FOR TEST': { bg: '#C6DCFA', color: '#143f7a' },
+  TESTING: { bg: '#BBD5F8', color: '#143f7a' },
+  'USER TEST': { bg: '#B0CEF7', color: '#0d366b' },
+  'WAITING FOR PROD DEPLOY': { bg: '#A5C7F6', color: '#0d366b' },
+  Done: { bg: '#9AC0F5', color: '#0d366b' },
+  REOPENED: { bg: '#FDEDE4', color: '#A9481A' },
+  BLOCKED: { bg: '#FBEAEA', color: '#A32B2B' },
+  CANCELLED: { bg: '#F2F1EF', color: '#56544F' },
 };
 
 export const PRIORITY_BADGE = {
