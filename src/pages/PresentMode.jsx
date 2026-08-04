@@ -120,8 +120,9 @@ export default function PresentMode({ data, onExit }) {
     const meta = data.sprintGoals?.meta || {};
     const endDate = (meta.endDate || '').replace(/\//g, '');
     const sprint = meta.sprint || 'Sprint';
-    return `AYD-Sprint review monitoring_${endDate}_HA.OS-Sprint review (${sprint})`;
-  }, [data.sprintGoals]);
+    const projectName = data.project?.name || 'HA.OS';
+    return `AYD-Sprint review monitoring_${endDate}_${projectName}-Sprint review (${sprint})`;
+  }, [data.sprintGoals, data.project]);
 
   // Wait for DOM paint + recharts animation to complete
   const waitForRender = () => new Promise((resolve) => {

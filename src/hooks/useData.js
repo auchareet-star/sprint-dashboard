@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { rawAll, rawBugs } from '../data/sampleData';
-import { fetchAllCards, fetchBugs, fetchMAIssues, fetchTeamMembers, fetchSprintGoals, fetchNextSprintGoals, fetchOverviewUpdate, fetchSprintList, fetchIssuesEncountered, resolveSprintDates, isGoogleSheetsConfigured } from '../data/googleSheets';
+import { fetchAllCards, fetchBugs, fetchMAIssues, fetchTeamMembers, fetchSprintGoals, fetchNextSprintGoals, fetchOverviewUpdate, fetchSprintList, fetchIssuesEncountered, fetchProject, resolveSprintDates, isGoogleSheetsConfigured } from '../data/googleSheets';
 
 export function useData() {
   const [cards, setCards] = useState(rawAll);
@@ -12,6 +12,7 @@ export function useData() {
   const [issues, setIssues] = useState([]);
   const [overviewUpdate, setOverviewUpdate] = useState([]);
   const [sprintList, setSprintList] = useState([]);
+  const [project, setProject] = useState({ name: '' });
   const [loading, setLoading] = useState(false);
   const [source, setSource] = useState('sample');
 
@@ -59,7 +60,11 @@ export function useData() {
       .then((s) => { console.log('Sprint list loaded:', s.length); setSprintList(s); })
       .catch((err) => console.warn('fetchSprintList failed:', err));
 
-    Promise.all([loadCards, loadBugs, loadMAIssues, loadTeam, loadGoals, loadNextGoals, loadIssues, loadOverview, loadSprintList]).finally(() => {
+    const loadProject = fetchProject()
+      .then((p) => { console.log('Project loaded:', p.name); setProject(p); })
+      .catch((err) => console.warn('fetchProject failed:', err));
+
+    Promise.all([loadCards, loadBugs, loadMAIssues, loadTeam, loadGoals, loadNextGoals, loadIssues, loadOverview, loadSprintList, loadProject]).finally(() => {
       setSource(cardsOk || bugsOk ? 'google' : 'sample');
       setLoading(false);
     });
@@ -69,5 +74,5 @@ export function useData() {
   const resolvedGoals = useMemo(() => resolveSprintDates(sprintGoals, sprintList), [sprintGoals, sprintList]);
   const resolvedNextGoals = useMemo(() => resolveSprintDates(nextSprintGoals, sprintList), [nextSprintGoals, sprintList]);
 
-  return { cards, bugs, maIssues, team, sprintGoals: resolvedGoals, nextSprintGoals: resolvedNextGoals, issues, overviewUpdate, sprintList, loading, source };
+  return { cards, bugs, maIssues, team, sprintGoals: resolvedGoals, nextSprintGoals: resolvedNextGoals, issues, overviewUpdate, sprintList, project, loading, source };
 }

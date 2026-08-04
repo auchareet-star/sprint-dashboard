@@ -243,6 +243,16 @@ export async function fetchSprintList() {
   })).filter((r) => r.name);
 }
 
+/**
+ * Project sheet holds a single row describing the project shown on the cover.
+ * Columns: Name
+ */
+export async function fetchProject() {
+  const rows = await fetchSheet('Project');
+  const row = rows.find((r) => (r['Name'] ?? r.name ?? '').trim());
+  return { name: (row?.['Name'] ?? row?.name ?? '').trim() };
+}
+
 export async function fetchIssuesEncountered() {
   const rows = await fetchSheet('Issues Encountered');
   return rows.map((r) => ({

@@ -4,6 +4,7 @@ const LOGO_URL = import.meta.env.BASE_URL + 'ayodia-logo-dark.png';
 
 export default function CoverPage({ data, slideRef }) {
   const meta = data.sprintGoals?.meta || {};
+  const projectName = data.project?.name || 'HA.OS';
   const sprintName = meta.sprint || 'Sprint';
   const sprintNum = sprintName.replace(/\D/g, '') || '';
   const duration =
@@ -79,7 +80,7 @@ export default function CoverPage({ data, slideRef }) {
               letterSpacing: '-0.02em',
             }}
           >
-            HA.OS
+            {projectName}
             <br />
             Sprint review (SP.{sprintNum})
           </h1>

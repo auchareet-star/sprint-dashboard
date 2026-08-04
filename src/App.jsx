@@ -159,9 +159,9 @@ function BugListNav({ assigneeList, goToAssignee, slideRef }) {
 export default function App() {
   const [showAssigneeMenu, setShowAssigneeMenu] = useState(false);
   const slideRef = useRef(null);
-  const { cards, bugs, maIssues, team, sprintGoals, nextSprintGoals, issues, overviewUpdate, sprintList, loading, source } = useData();
+  const { cards, bugs, maIssues, team, sprintGoals, nextSprintGoals, issues, overviewUpdate, sprintList, project, loading, source } = useData();
   const processed = useProcessedData(cards, bugs);
-  const data = { ...processed, team, sprintGoals, nextSprintGoals, issues, overviewUpdate, sprintList, maIssues };
+  const data = { ...processed, team, sprintGoals, nextSprintGoals, issues, overviewUpdate, sprintList, maIssues, project };
 
   const [route, setRoute] = useState(() => parseHash(SLIDES));
 
