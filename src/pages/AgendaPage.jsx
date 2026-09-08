@@ -4,6 +4,7 @@ import SlideLayout from '../components/SlideLayout';
 const AGENDA_ITEMS = [
   'Team members',
   'Overview',
+  'Milestone Tracking',
   'Sprint Goals',
   'Executive Summary',
   'Effort Overview',

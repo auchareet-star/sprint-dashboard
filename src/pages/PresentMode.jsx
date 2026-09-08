@@ -5,6 +5,7 @@ import CoverPage from './CoverPage';
 import AgendaPage from './AgendaPage';
 import TeamMembers from './TeamMembers';
 import OverviewUpdate, { computeOverviewPageCount } from './OverviewUpdate';
+import Milestones, { computeMilestonePageCount } from './Milestones';
 import SprintGoals from './SprintGoals';
 import ExecutiveSummary from './ExecutiveSummary';
 import EffortOverview from './EffortOverview';
@@ -24,6 +25,7 @@ const STATIC_PRESENT = [
   { id: 'agenda', label: 'Agenda', Component: AgendaPage },
   { id: 'members', label: 'Team Members', Component: TeamMembers },
   '__OVERVIEW__',
+  '__MILESTONES__',
   { id: 'goals', label: 'Sprint Goals', Component: SprintGoals },
   { id: 'executive', label: 'Executive Summary', Component: ExecutiveSummary },
   { id: 'effort', label: 'Effort Overview', Component: EffortOverview },
@@ -75,11 +77,22 @@ export default function PresentMode({ data, onExit }) {
     }));
 
     const result = [];
+    const milestonePageCount = computeMilestonePageCount(data);
+    const milestoneSlides = (data.milestones || []).length
+      ? Array.from({ length: milestonePageCount }, (_, i) => ({
+          id: `milestones-${i}`,
+          label: milestonePageCount > 1 ? `Milestone Tracking ${i + 1}/${milestonePageCount}` : 'Milestone Tracking',
+          render: (props) => <Milestones data={props.data} slideRef={props.slideRef} forcePage={i} />,
+        }))
+      : [];
+
     STATIC_PRESENT.forEach((s) => {
       if (s === '__CARDS__') {
         result.push(...cardSlides);
       } else if (s === '__OVERVIEW__') {
         result.push(...overviewSlides);
+      } else if (s === '__MILESTONES__') {
+        result.push(...milestoneSlides);
       } else {
         result.push({
           ...s,

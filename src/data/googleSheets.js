@@ -233,6 +233,36 @@ export async function fetchOverviewUpdate() {
   })).filter((r) => r.module);
 }
 
+/**
+ * Milestones sheet — one row per contract deliverable (สิ่งส่งมอบรายงวด).
+ * Columns: No, Project, Phase, Phase Name, Payment, Milestone Due, Deliverable,
+ *          Format, Owner, Plan Start, Plan Finish, Sprint, Status, Progress,
+ *          Acceptance, Source, Remark, Due Basis, Caution
+ */
+export async function fetchMilestones() {
+  const rows = await fetchSheet('Milestones');
+  return rows.map((r) => ({
+    project: r['Project'] ?? '',
+    phase: r['Phase'] ?? '',
+    phaseName: r['Phase Name'] ?? '',
+    payment: r['Payment'] ?? '',
+    milestoneDue: r['Milestone Due'] ?? '',
+    deliverable: r['Deliverable'] ?? '',
+    format: r['Format'] ?? '',
+    owner: r['Owner'] ?? '',
+    planStart: r['Plan Start'] ?? '',
+    planFinish: r['Plan Finish'] ?? '',
+    sprint: r['Sprint'] ?? '',
+    status: r['Status'] ?? '',
+    progress: r['Progress'] ?? '',
+    acceptance: r['Acceptance'] ?? '',
+    source: r['Source'] ?? '',
+    remark: r['Remark'] ?? '',
+    dueBasis: r['Due Basis'] ?? '',
+    caution: r['Caution'] ?? '',
+  })).filter((r) => r.deliverable && r.phase);
+}
+
 export async function fetchSprintList() {
   const rows = await fetchSheet('Sprint');
   return rows.map((r) => ({
