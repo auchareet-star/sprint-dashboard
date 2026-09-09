@@ -234,33 +234,45 @@ export async function fetchOverviewUpdate() {
 }
 
 /**
- * Milestones sheet — one row per contract deliverable (สิ่งส่งมอบรายงวด).
- * Columns: No, Project, Phase, Phase Name, Payment, Milestone Due, Deliverable,
- *          Format, Owner, Plan Start, Plan Finish, Sprint, Status, Progress,
- *          Acceptance, Source, Remark, Due Basis, Caution
+ * Milestones sheet — one row per contract deliverable.
+ * Columns: No, Project, Phase, Deliverable, Format, Owner, Plan Start,
+ *          Plan Finish, Status, Progress, Acceptance, Source, Contract, Remark
+ * Sprint is not stored — it is derived from Plan Finish against the Sprint sheet.
  */
 export async function fetchMilestones() {
   const rows = await fetchSheet('Milestones');
   return rows.map((r) => ({
     project: r['Project'] ?? '',
     phase: r['Phase'] ?? '',
-    phaseName: r['Phase Name'] ?? '',
-    payment: r['Payment'] ?? '',
-    milestoneDue: r['Milestone Due'] ?? '',
     deliverable: r['Deliverable'] ?? '',
     format: r['Format'] ?? '',
     owner: r['Owner'] ?? '',
     planStart: r['Plan Start'] ?? '',
     planFinish: r['Plan Finish'] ?? '',
-    sprint: r['Sprint'] ?? '',
     status: r['Status'] ?? '',
     progress: r['Progress'] ?? '',
     acceptance: r['Acceptance'] ?? '',
     source: r['Source'] ?? '',
+    contract: r['Contract'] ?? '',
     remark: r['Remark'] ?? '',
+  })).filter((r) => r.deliverable && r.phase);
+}
+
+/**
+ * Milestone Phases sheet — one row per งวด, holding what the whole phase shares.
+ * Columns: Project, Phase, Phase Name, Payment, Milestone Due, Due Basis, Caution
+ */
+export async function fetchMilestonePhases() {
+  const rows = await fetchSheet('Milestone Phases');
+  return rows.map((r) => ({
+    project: r['Project'] ?? '',
+    phase: r['Phase'] ?? '',
+    phaseName: r['Phase Name'] ?? '',
+    payment: r['Payment'] ?? '',
+    milestoneDue: r['Milestone Due'] ?? '',
     dueBasis: r['Due Basis'] ?? '',
     caution: r['Caution'] ?? '',
-  })).filter((r) => r.deliverable && r.phase);
+  })).filter((r) => r.project && r.phase);
 }
 
 export async function fetchSprintList() {

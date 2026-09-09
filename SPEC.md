@@ -47,7 +47,8 @@
 | `Overview Update` | Module, Task, Start Sprint, End Sprint, Status, Remark | Overview Update |
 | `Sprint` | Sprint, Start Date, End Date, Active (`Now`/`Next`/blank) | resolve วันที่ของ Sprint Goals + ระบายสี header ของ Overview |
 | `Issues Encountered` | Issues, Impacts, Solutions | Issues Encountered |
-| `Milestones` | Project, Phase, Phase Name, Payment, Milestone Due, Deliverable, Format, Owner, Plan Start, Plan Finish, Sprint, Status, Progress, Acceptance, Source, Remark, Due Basis, Caution | Milestone Tracking |
+| `Milestones` | No, Project, Phase, Deliverable, Format, Owner, Plan Start, Plan Finish, Status, Progress, Acceptance, Source, Contract, Remark | Milestone Tracking (ระดับรายการ) |
+| `Milestone Phases` | Project, Phase, Phase Name, Payment, Milestone Due, Due Basis, Caution | Milestone Tracking (ระดับงวด) |
 
 ### 2.3 Loading Flow
 
@@ -217,10 +218,21 @@ Cover → Agenda → Team Members
 - `computeMilestonePageCount(data)` — ให้ PresentMode รู้จำนวนหน้าโดยไม่ต้อง render
 - ถ้า sheet `Milestones` ว่าง/โหลดไม่ได้ → Present **ข้ามสไลด์นี้ทั้งหมด**, Dashboard โชว์ "No data available"
 
+#### สองชีต แยกตามระดับข้อมูล
+
+| ชีต | 1 แถว = | ถือข้อมูลอะไร |
+|---|---|---|
+| `Milestone Phases` | 1 งวด (7 แถว) | ชื่องวด · % จ่ายเงิน · วันครบกำหนด · ที่มาของกำหนดส่ง · ข้อควรระวัง |
+| `Milestones` | 1 สิ่งส่งมอบ (57 แถว) | ชื่อ · รูปแบบ · ผู้รับผิดชอบ · แผนเริ่ม-จบ · สถานะ · % · เกณฑ์ตรวจรับ · ที่มา · เป็นสิ่งส่งมอบตามสัญญาหรือไม่ |
+
+`buildProjects(rows, phaseRows, sprintList)` join ด้วยคีย์ `Project|Phase` — งวดที่ไม่มีแถวใน `Milestone Phases` จะยังแสดงได้ แต่ไม่มีชื่องวด/วันครบกำหนด/หมายเหตุ
+
+> ก่อนหน้านี้ค่าระดับงวดถูกเก็บปนในตารางระดับรายการ — `Phase Name`/`Milestone Due` ซ้ำทุกแถว ส่วน `Payment`/`Due Basis`/`Caution` กรอกเฉพาะแถวแรกของงวด ซึ่งพังทันทีถ้ามีการ sort ชีตใหม่
+
 #### การจัดกลุ่ม (`buildProjects`)
-- Project → Phase (งวด) ตามลำดับแถวใน sheet
-- `Payment` อ่านจากแถวแรกของงวด (เขียนครั้งเดียวต่องวด)
+- Project → Phase (งวด) ตามลำดับแถวใน sheet `Milestones`
 - **งวดปัจจุบัน** = งวดแรกที่ยังมีรายการไม่ `Completed` (ถ้าเสร็จหมดทุกงวด → งวดสุดท้าย)
+- **`Sprint` ไม่ได้เก็บในชีต** — `sprintOf(planFinish, sprintList)` คำนวณจากชีต `Sprint` ทุกครั้ง (วันที่ตกเสาร์-อาทิตย์ปัดไป Sprint ถัดไป · เลย Sprint สุดท้าย → `หลัง Sprint N`)
 
 #### เลือกดูงวดอื่น (การ์ดงวด = ตัวกรอง)
 
@@ -233,6 +245,9 @@ Cover → Agenda → Team Members
 #### Layout
 1. **KPI 4 ช่อง** — งวดปัจจุบัน + % ค่าจ้าง / วันครบกำหนด + วันที่เหลือ / สิ่งส่งมอบตามสัญญา (เสร็จ/ทั้งหมด) / จำนวนรายการเลยกำหนดแผน
 2. **การ์ดงวด** — เรียงทุกงวดของโครงการ · งวดปัจจุบันมีขอบส้ม · progress bar = สัดส่วนรายการที่ `Completed` (แดงถ้ามีงานเลยกำหนด) · badge บอก `เหลือ n วัน` / `เลย n วัน` / `ส่งครบแล้ว`
+- **`Contract`** (`Yes`/`No`) เป็นตัวชี้ขาดว่าแถวไหนนับเป็นสิ่งส่งมอบตามสัญญา (KPI `สิ่งส่งมอบตามสัญญา` + แถบสีส้มหน้าแถว) · ถ้าเว้นว่าง ถอยไปใช้กติกาเดิมคือ `Source` ขึ้นต้นด้วย `TOR` หรือ `สัญญา`
+- **`Acceptance`** แสดงเป็น tooltip เมื่อชี้ที่ชื่อรายการ (ไม่กินพื้นที่สไลด์)
+
 3. **ตารางสิ่งที่ต้องส่งของงวดปัจจุบัน** — เรียงตาม `Plan Finish` · แถบซ้ายสีส้ม = สิ่งส่งมอบตามสัญญา (`Source` ขึ้นต้นด้วย `TOR` หรือ `สัญญา`), สีเทา = งานเตรียม · วันที่เป็นสีแดง + ⚠ ถ้าเลยกำหนดและยังไม่ `Completed` · คอลัมน์ `คืบหน้า` = bar + % รายรายการ
 
 #### การคิด % ความคืบหน้า (`rowProgress`)

@@ -42,11 +42,16 @@ function rowProgress(item) {
 const OVERDUE = '#EF4444';
 const DUE_SOON = '#F59E0B';
 
-/** Rows whose Source starts with these are contract deliverables, not prep work. */
+// A contract deliverable is one the client pays against — the sheet says so in
+// its Contract column. Sheets written before that column existed fall back to
+// the old rule: a Source naming the TOR or the contract itself.
 const CONTRACT_SOURCES = ['TOR', 'สัญญา'];
 
-function isContractRow(source) {
-  return CONTRACT_SOURCES.some((s) => (source || '').startsWith(s));
+function isContractRow(item) {
+  const flag = String(item.contract ?? '').trim().toLowerCase();
+  if (flag) return flag === 'yes' || flag === 'y' || flag === 'true' || flag === 'ใช่';
+  const source = String(item.source ?? '').trim();
+  return CONTRACT_SOURCES.some((s) => source.startsWith(s));
 }
 
 /** dd/mm/yyyy (sheet format) or ISO. Returns null when unparseable. */
@@ -85,6 +90,23 @@ function parsePercent(val) {
   return isNaN(n) ? null : (String(val).includes('%') || n > 1 ? n : n * 100);
 }
 
+/**
+ * Which sprint a plan date lands in. Dates that fall in the gap between two
+ * sprints (a weekend) round forward to the sprint that starts next.
+ */
+function sprintOf(date, sprintList) {
+  if (!date || !sprintList?.length) return '';
+  const ranges = sprintList
+    .map((sp) => ({ name: sp.name, start: parseDate(sp.startDate), end: parseDate(sp.endDate) }))
+    .filter((sp) => sp.start && sp.end);
+  const inside = ranges.find((sp) => date >= sp.start && date <= sp.end);
+  if (inside) return inside.name;
+  const next = ranges.find((sp) => date < sp.start);
+  if (next) return next.name;
+  const last = ranges[ranges.length - 1];
+  return last ? `หลัง ${last.name}` : '';
+}
+
 function startOfToday() {
   const d = new Date();
   d.setHours(0, 0, 0, 0);
@@ -95,8 +117,13 @@ function startOfToday() {
  * Group rows into projects -> phases, keeping sheet order.
  * Each phase carries its own due date, payment share and deliverable counts.
  */
-function buildProjects(rows) {
+function buildProjects(rows, phaseRows, sprintList) {
   const today = startOfToday();
+  // ข้อมูลระดับงวดอยู่คนละชีต — คีย์ด้วย "โครงการ|งวด"
+  const meta = {};
+  (phaseRows || []).forEach((p) => {
+    meta[`${p.project}|${p.phase}`] = p;
+  });
   const projectOrder = [];
   const byProject = {};
 
@@ -107,31 +134,29 @@ function buildProjects(rows) {
     }
     const proj = byProject[r.project];
     if (!proj.phases[r.phase]) {
+      const m = meta[`${r.project}|${r.phase}`] || {};
       proj.phases[r.phase] = {
         phase: r.phase,
-        name: r.phaseName,
-        due: r.milestoneDue,
-        dueDate: parseDate(r.milestoneDue),
-        payment: null,
-        dueBasis: '',
-        caution: '',
+        name: m.phaseName || '',
+        due: m.milestoneDue || '',
+        dueDate: parseDate(m.milestoneDue),
+        payment: parsePercent(m.payment),
+        dueBasis: m.dueBasis || '',
+        caution: m.caution || '',
         items: [],
       };
       proj.phaseOrder.push(r.phase);
     }
     const ph = proj.phases[r.phase];
-    // Payment share and the two note fields are written once per phase, on its first row.
-    if (ph.payment == null) ph.payment = parsePercent(r.payment);
-    if (!ph.dueBasis && r.dueBasis) ph.dueBasis = r.dueBasis;
-    if (!ph.caution && r.caution) ph.caution = r.caution;
-    ph.items.push({ ...r, finishDate: parseDate(r.planFinish) });
+    const finishDate = parseDate(r.planFinish);
+    ph.items.push({ ...r, finishDate, sprint: sprintOf(finishDate, sprintList) });
   });
 
   return projectOrder.map((name) => {
     const proj = byProject[name];
     const phases = proj.phaseOrder.map((key) => {
       const ph = proj.phases[key];
-      const contract = ph.items.filter((it) => isContractRow(it.source));
+      const contract = ph.items.filter(isContractRow);
       const done = ph.items.filter((it) => it.status === 'Completed').length;
       // "เริ่มแล้ว" นับสะสม — รวมรายการที่ปิดไปแล้วด้วย เส้นจึงไม่สั้นลงเมื่องานเสร็จ
       const inFlight = ph.items.filter(
@@ -169,7 +194,7 @@ function buildProjects(rows) {
 export function computeMilestonePageCount(data) {
   const rows = data.milestones || [];
   if (!rows.length) return 1;
-  return buildProjects(rows).length;
+  return buildProjects(rows, data.milestonePhases, data.sprintList).length;
 }
 
 /** One labelled progress track inside a phase card. */
@@ -320,7 +345,12 @@ export default function Milestones({ data, slideRef, forcePage }) {
     setPickedPhase(null);
   }, [page]);
 
-  const projects = useMemo(() => buildProjects(rows), [rows]);
+  const phaseRows = data.milestonePhases || [];
+  const sprintList = data.sprintList || [];
+  const projects = useMemo(
+    () => buildProjects(rows, phaseRows, sprintList),
+    [rows, phaseRows, sprintList],
+  );
   const today = startOfToday();
 
   if (!projects.length) {
@@ -356,7 +386,7 @@ export default function Milestones({ data, slideRef, forcePage }) {
 
   const overdueAll = project.phases.reduce((sum, p) => sum + p.overdue, 0);
   const contractLeft = active.items.filter(
-    (it) => isContractRow(it.source) && it.status !== 'Completed',
+    (it) => isContractRow(it) && it.status !== 'Completed',
   ).length;
 
   const title = totalPages > 1
@@ -515,11 +545,22 @@ export default function Milestones({ data, slideRef, forcePage }) {
                               width: 4,
                               height: 18,
                               borderRadius: 2,
-                              background: isContractRow(it.source) ? '#D97706' : '#CBD5E1',
+                              background: isContractRow(it) ? '#D97706' : '#CBD5E1',
                               flexShrink: 0,
                             }}
                           />
-                          <span className="truncate" title={it.deliverable}>{it.deliverable}</span>
+                          <span
+                            className="truncate"
+                            title={
+                              it.acceptance
+                                ? `${it.deliverable}
+
+เกณฑ์ตรวจรับ: ${it.acceptance}`
+                                : it.deliverable
+                            }
+                          >
+                            {it.deliverable}
+                          </span>
                         </div>
                       </td>
                       <td className="truncate" style={{ padding: cellPad, fontSize: T.micro, color: '#475569' }} title={it.format}>

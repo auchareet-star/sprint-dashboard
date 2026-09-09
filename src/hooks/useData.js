@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { rawAll, rawBugs } from '../data/sampleData';
-import { fetchAllCards, fetchBugs, fetchMAIssues, fetchTeamMembers, fetchSprintGoals, fetchNextSprintGoals, fetchOverviewUpdate, fetchSprintList, fetchMilestones, fetchIssuesEncountered, fetchProject, resolveSprintDates, isGoogleSheetsConfigured } from '../data/googleSheets';
+import { fetchAllCards, fetchBugs, fetchMAIssues, fetchTeamMembers, fetchSprintGoals, fetchNextSprintGoals, fetchOverviewUpdate, fetchSprintList, fetchMilestones, fetchMilestonePhases, fetchIssuesEncountered, fetchProject, resolveSprintDates, isGoogleSheetsConfigured } from '../data/googleSheets';
 
 export function useData() {
   const [cards, setCards] = useState(rawAll);
@@ -13,6 +13,7 @@ export function useData() {
   const [overviewUpdate, setOverviewUpdate] = useState([]);
   const [sprintList, setSprintList] = useState([]);
   const [milestones, setMilestones] = useState([]);
+  const [milestonePhases, setMilestonePhases] = useState([]);
   const [project, setProject] = useState({ name: '' });
   const [loading, setLoading] = useState(false);
   const [source, setSource] = useState('sample');
@@ -65,11 +66,15 @@ export function useData() {
       .then((m) => { console.log('Milestones loaded:', m.length); setMilestones(m); })
       .catch((err) => console.warn('fetchMilestones failed:', err));
 
+    const loadMilestonePhases = fetchMilestonePhases()
+      .then((p) => { console.log('Milestone Phases loaded:', p.length); setMilestonePhases(p); })
+      .catch((err) => console.warn('fetchMilestonePhases failed:', err));
+
     const loadProject = fetchProject()
       .then((p) => { console.log('Project loaded:', p.name); setProject(p); })
       .catch((err) => console.warn('fetchProject failed:', err));
 
-    Promise.all([loadCards, loadBugs, loadMAIssues, loadTeam, loadGoals, loadNextGoals, loadIssues, loadOverview, loadSprintList, loadProject, loadMilestones]).finally(() => {
+    Promise.all([loadCards, loadBugs, loadMAIssues, loadTeam, loadGoals, loadNextGoals, loadIssues, loadOverview, loadSprintList, loadProject, loadMilestones, loadMilestonePhases]).finally(() => {
       setSource(cardsOk || bugsOk ? 'google' : 'sample');
       setLoading(false);
     });
@@ -79,5 +84,5 @@ export function useData() {
   const resolvedGoals = useMemo(() => resolveSprintDates(sprintGoals, sprintList), [sprintGoals, sprintList]);
   const resolvedNextGoals = useMemo(() => resolveSprintDates(nextSprintGoals, sprintList), [nextSprintGoals, sprintList]);
 
-  return { cards, bugs, maIssues, team, sprintGoals: resolvedGoals, nextSprintGoals: resolvedNextGoals, issues, overviewUpdate, sprintList, milestones, project, loading, source };
+  return { cards, bugs, maIssues, team, sprintGoals: resolvedGoals, nextSprintGoals: resolvedNextGoals, issues, overviewUpdate, sprintList, milestones, milestonePhases, project, loading, source };
 }
