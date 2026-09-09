@@ -411,11 +411,20 @@ export default function Milestones({ data, slideRef, forcePage }) {
             label="ครบกำหนด"
             value={thaiDate(active.due)}
             sub={
-              active.daysLeft == null ? '—'
+              // A delivered phase is done with its deadline — counting days past it
+              // reads as a breach when there is none.
+              active.closed ? 'ส่งครบแล้ว'
+                : active.daysLeft == null ? '—'
                 : active.daysLeft < 0 ? `เลยกำหนด ${Math.abs(active.daysLeft)} วัน`
                 : `อีก ${active.daysLeft} วัน`
             }
-            color={active.daysLeft != null && active.daysLeft < 30 ? DUE_SOON : '#0F172A'}
+            color={
+              active.closed ? '#1D4ED8'
+                : active.daysLeft == null ? '#0F172A'
+                : active.daysLeft < 0 ? OVERDUE
+                : active.daysLeft <= 30 ? DUE_SOON
+                : '#0F172A'
+            }
           />
           <KPI
             label="สิ่งส่งมอบตามสัญญา"
