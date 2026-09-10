@@ -52,9 +52,17 @@ function buildSprints(rows, sprintList) {
     .filter((s) => usedSprints.has(sprintNum(s.name)))
     .sort((a, b) => sprintNum(a.name) - sprintNum(b.name));
 
-  const sprints = allSprints.slice(-10);
+  // The board shows a 10-sprint window. Anchor it on the sprint marked Now with
+  // one sprint of context behind it — a plan running out to Sprint 20 would
+  // otherwise push the sprint the team is actually in off the slide.
+  const WINDOW = 10;
+  const nowIdx = allSprints.findIndex((s) => s.active === 'Now');
+  const start = nowIdx >= 0
+    ? Math.min(Math.max(nowIdx - 1, 0), Math.max(allSprints.length - WINDOW, 0))
+    : Math.max(allSprints.length - WINDOW, 0);
+  const sprints = allSprints.slice(start, start + WINDOW);
 
-  if (sprints.length === 0) return { sprints: [], sprintIndex: {}, currentSprint: '' };
+  if (sprints.length === 0) return { sprints: [], sprintIndex: {}, currentSprints: new Set(), currentIdx: -1 };
 
   const sprintIndex = {};
   sprints.forEach((s, i) => { sprintIndex[s.name] = i; });
@@ -62,8 +70,9 @@ function buildSprints(rows, sprintList) {
   const currentSprints = new Set(
     sprintList.filter((s) => s.active === 'Now').map((s) => s.name)
   );
+  const currentIdx = sprints.findIndex((s) => currentSprints.has(s.name));
 
-  return { sprints, sprintIndex, currentSprints };
+  return { sprints, sprintIndex, currentSprints, currentIdx };
 }
 
 function buildLanes(tasks, sprintIndex) {
@@ -234,6 +243,32 @@ function paginateModules(moduleOrder, moduleLanes, sprintCount) {
   return pages.length > 0 ? pages : [[]];
 }
 
+/**
+ * A page carrying work in the current sprint is the one a review opens on, so
+ * those lead. Pages a split module spans stay together and in order, otherwise
+ * a "(ต่อ)" page could surface before the page it continues.
+ */
+function orderPagesByCurrentSprint(pages, currentIdx) {
+  if (currentIdx == null || currentIdx < 0 || pages.length < 2) return pages;
+
+  // A page opening with a continued module belongs to the block before it.
+  const blocks = [];
+  pages.forEach((pg) => {
+    if (blocks.length && pg[0]?.continued) blocks[blocks.length - 1].push(pg);
+    else blocks.push([pg]);
+  });
+
+  const touchesNow = (block) => block.some((pg) => pg.some((entry) =>
+    entry.lanes.some((lane) => lane.some(
+      (item) => item.startIdx <= currentIdx && (item.endIdx ?? item.startIdx) >= currentIdx,
+    )),
+  ));
+
+  const withNow = blocks.filter(touchesNow);
+  const rest = blocks.filter((b) => !touchesNow(b));
+  return [...withNow, ...rest].flat();
+}
+
 /** Compute total page count without rendering — used by PresentMode */
 export function computeOverviewPageCount(data) {
   const rows = data.overviewUpdate || [];
@@ -259,7 +294,7 @@ export default function OverviewUpdate({ data, slideRef, forcePage }) {
     if (forcePage != null) setPage(forcePage);
   }, [forcePage]);
 
-  const { sprints, sprintIndex, currentSprints } = useMemo(
+  const { sprints, sprintIndex, currentSprints, currentIdx } = useMemo(
     () => buildSprints(rows, sprintListRaw),
     [rows, sprintListRaw],
   );
@@ -290,8 +325,11 @@ export default function OverviewUpdate({ data, slideRef, forcePage }) {
   }, [moduleOrder, moduleMap, sprintIndex]);
 
   const pages = useMemo(
-    () => paginateModules(moduleOrder, moduleLanes, sprints.length),
-    [moduleOrder, moduleLanes, sprints.length],
+    () => orderPagesByCurrentSprint(
+      paginateModules(moduleOrder, moduleLanes, sprints.length),
+      currentIdx,
+    ),
+    [moduleOrder, moduleLanes, sprints.length, currentIdx],
   );
 
   const totalPages = pages.length;
