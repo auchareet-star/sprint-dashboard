@@ -122,29 +122,115 @@ function getCellSprintIdx(cells, cellIdx, subIdx) {
   return pos + subIdx;
 }
 
-/** Max table body rows per page */
-export const MAX_ROWS = 18;
+/**
+ * Height of the table body on a 1080px slide, after the page header, the legend
+ * row and the sprint header row have taken their share.
+ */
+const BODY_BUDGET_PX = 800;
+
+/** Table is 1812px wide inside the slide padding; the module column takes 130. */
+const SPRINT_AREA_PX = 1812 - 130;
+
+/** Roughly how wide a Thai glyph renders at the 13px caption size. */
+const GLYPH_PX = 7.2;
+
+const TASK_LINE_PX = 18;
+const NOTE_LINE_PX = 13;
+const CELL_PADDING_PX = 10;
+const MIN_LANE_PX = 34;
 
 /**
- * Split modules into pages so each page has ≤ MAX_ROWS lanes total.
+ * A lane is as tall as its tallest cell, and a cell is as tall as its text wraps.
+ * Remarks carry a full sprint recap now, so one lane can run past 250px — far
+ * from the ~40px a fixed row count assumes. Estimate instead of guessing.
  */
-function paginateModules(moduleOrder, moduleLanes) {
-  const pages = [];
-  let currentPage = [];
-  let currentRows = 0;
+function estimateLaneHeight(lane, sprintCount) {
+  const colPx = SPRINT_AREA_PX / Math.max(sprintCount, 1);
+  let tallest = MIN_LANE_PX;
 
-  moduleOrder.forEach((mod) => {
-    const laneCount = Math.max(moduleLanes[mod]?.length || 0, 1);
-    if (currentRows + laneCount > MAX_ROWS && currentPage.length > 0) {
-      pages.push(currentPage);
-      currentPage = [];
-      currentRows = 0;
-    }
-    currentPage.push(mod);
-    currentRows += laneCount;
+  lane.forEach((item) => {
+    const span = Math.max((item.endIdx ?? item.startIdx) - item.startIdx + 1, 1);
+    const perLine = Math.max(Math.floor((colPx * span - 14) / GLYPH_PX), 8);
+    const taskLines = Math.ceil((item.task || '').length / perLine) || 1;
+    const noteLines = item.notes ? Math.ceil(item.notes.length / perLine) : 0;
+    const h = CELL_PADDING_PX + taskLines * TASK_LINE_PX + noteLines * NOTE_LINE_PX;
+    if (h > tallest) tallest = h;
   });
 
-  if (currentPage.length > 0) pages.push(currentPage);
+  return tallest;
+}
+
+function moduleHeights(lanes, sprintCount) {
+  if (!lanes.length) return [MIN_LANE_PX];
+  return lanes.map((lane) => estimateLaneHeight(lane, sprintCount));
+}
+
+/**
+ * The module label spans every lane of its module, and a long name wraps inside
+ * a 130px column — "เมืองสมุทร - Design & เอกสารส่งมอบ" runs three lines. A module
+ * is therefore never shorter than its own label.
+ */
+function moduleLabelHeight(mod) {
+  const perLine = Math.max(Math.floor((130 - 20) / 8), 6);
+  return Math.ceil((mod || '').length / perLine) * 20 + 12;
+}
+
+/**
+ * Fill each page up to the height budget rather than a row count. A module stays
+ * whole where it fits; one taller than a whole page is split across pages and
+ * its label repeats with "(ต่อ)" so the reader can follow it.
+ */
+function paginateModules(moduleOrder, moduleLanes, sprintCount) {
+  const pages = [];
+  let page = [];
+  let used = 0;
+
+  const flush = () => {
+    if (page.length) pages.push(page);
+    page = [];
+    used = 0;
+  };
+
+  moduleOrder.forEach((mod) => {
+    const lanes = moduleLanes[mod] || [];
+    const heights = moduleHeights(lanes, sprintCount);
+    const total = Math.max(
+      heights.reduce((a, b) => a + b, 0),
+      moduleLabelHeight(mod),
+    );
+
+    // Start a fresh page when this module cannot follow what is already there.
+    if (page.length && used + total > BODY_BUDGET_PX) flush();
+
+    if (total <= BODY_BUDGET_PX || lanes.length < 2) {
+      // Fits, or is a single lane that cannot be broken up anyway.
+      page.push({ mod, lanes, continued: false });
+      used += total;
+      return;
+    }
+
+    // Taller than a whole page — hand out its lanes page by page.
+    let chunk = [];
+    let chunkPx = 0;
+    let first = true;
+    lanes.forEach((lane, i) => {
+      if (chunk.length && chunkPx + heights[i] > BODY_BUDGET_PX) {
+        page.push({ mod, lanes: chunk, continued: !first });
+        first = false;
+        flush();
+        chunk = [];
+        chunkPx = 0;
+      }
+      chunk.push(lane);
+      chunkPx += heights[i];
+    });
+    if (chunk.length) {
+      page.push({ mod, lanes: chunk, continued: !first });
+      used = chunkPx;
+    }
+  });
+
+  flush();
   return pages.length > 0 ? pages : [[]];
 }
 
@@ -152,7 +238,7 @@ function paginateModules(moduleOrder, moduleLanes) {
 export function computeOverviewPageCount(data) {
   const rows = data.overviewUpdate || [];
   const sprintListRaw = data.sprintList || [];
-  const { sprintIndex } = buildSprints(rows, sprintListRaw);
+  const { sprints, sprintIndex } = buildSprints(rows, sprintListRaw);
   const moduleOrder = [];
   const moduleMap = {};
   rows.forEach((r) => {
@@ -161,7 +247,7 @@ export function computeOverviewPageCount(data) {
   });
   const moduleLanes = {};
   moduleOrder.forEach((mod) => { moduleLanes[mod] = buildLanes(moduleMap[mod], sprintIndex); });
-  return paginateModules(moduleOrder, moduleLanes).length;
+  return paginateModules(moduleOrder, moduleLanes, sprints.length).length;
 }
 
 export default function OverviewUpdate({ data, slideRef, forcePage }) {
@@ -204,8 +290,8 @@ export default function OverviewUpdate({ data, slideRef, forcePage }) {
   }, [moduleOrder, moduleMap, sprintIndex]);
 
   const pages = useMemo(
-    () => paginateModules(moduleOrder, moduleLanes),
-    [moduleOrder, moduleLanes],
+    () => paginateModules(moduleOrder, moduleLanes, sprints.length),
+    [moduleOrder, moduleLanes, sprints.length],
   );
 
   const totalPages = pages.length;
@@ -314,8 +400,8 @@ export default function OverviewUpdate({ data, slideRef, forcePage }) {
             </thead>
 
             <tbody>
-              {currentPageModules.map((mod) => {
-                const lanes = moduleLanes[mod] || [];
+              {currentPageModules.map((entry) => {
+                const { mod, lanes, continued } = entry;
                 const remarks = moduleRemarks[mod] || [];
                 const isRemarkOnly = lanes.length === 0 && remarks.length > 0;
                 const laneCount = Math.max(lanes.length, 1);
@@ -373,6 +459,9 @@ export default function OverviewUpdate({ data, slideRef, forcePage }) {
                           style={{ ...tdModuleStyle, background: isEven ? '#FFFFFF' : '#F8FAFC', verticalAlign: 'middle' }}
                         >
                           {mod}
+                          {continued && (
+                            <span style={{ fontSize: T.caption, fontWeight: 500, color: '#94A3B8' }}> (ต่อ)</span>
+                          )}
                         </td>
                       )}
                       {cells.map((cell, ci) => {

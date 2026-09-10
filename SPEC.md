@@ -192,10 +192,18 @@ Cover → Agenda → Team Members
 - Background = สีตาม status (`STATUS_STYLE`)
 - ถ้ามี `notes` → แสดงข้อความสีแดงด้านล่างของ task
 
-#### Pagination
+#### Pagination — คิดจาก "ความสูง" ไม่ใช่จำนวนแถว
 
-- `MAX_ROWS = 18` lanes ต่อหน้า
-- ฟังก์ชัน `paginateModules()`: ถ้าใส่ module ถัดไปแล้วเกิน MAX_ROWS → ขึ้นหน้าใหม่ก่อน (ไม่ตัด module กลางคัน)
+- งบความสูงของ table body ต่อหน้า = `BODY_BUDGET_PX = 800`
+- `estimateLaneHeight()` ประเมินความสูงจริงของแต่ละ lane จากความยาวข้อความ:
+  - กว้างคอลัมน์ = `(1812 − 130) / จำนวน Sprint` × `colSpan`
+  - จำนวนบรรทัด = `ความยาวข้อความ / (กว้าง ÷ 7.2px ต่อตัวอักษร)`
+  - สูง = `padding 10 + บรรทัด task × 18 + บรรทัด remark × 13`
+- ความสูงของ module = `max(ผลรวมทุก lane, ความสูงของชื่อ module)` — ชื่อยาวอย่าง `เมืองสมุทร - Design & เอกสารส่งมอบ` ตัด 3 บรรทัดในคอลัมน์ 130px
+- `paginateModules()` เติมทีละ module จนเต็มงบแล้วขึ้นหน้าใหม่ · module ที่สูงเกิน 1 หน้าจะถูก **ตัดข้ามหน้าทีละ lane** และชื่อ module จะมี `(ต่อ)` ต่อท้าย
+- `pages` เก็บ `{ mod, lanes, continued }` ไม่ใช่ชื่อ module เพราะ module เดียวอาจอยู่หลายหน้า
+
+> เดิมนับ lane ละ 1 หน่วย (18 lanes/หน้า) โดยสมมติว่าทุกแถวสูงเท่ากัน — พอ Remark ยาวขึ้นเป็นสรุปทั้ง Sprint แถวเดียวสูงได้ 250px+ เนื้อหาจึงล้นออกนอกสไลด์โดยไม่ขึ้นหน้าใหม่
 - ใน Dashboard: ปุ่ม `‹ n/N ›` ที่มุมซ้ายบน (state ของ component เอง)
 - ใน Present Mode: เรียก `computeOverviewPageCount(data)` แล้วสร้าง slide แยกต่อหน้า, ส่ง `forcePage={i}` ให้ component (override `useState`)
 
