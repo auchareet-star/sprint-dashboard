@@ -11,6 +11,7 @@ const STATUS_STYLE = {
   Planned:       { bg: '#9CA3AF', color: '#FFFFFF' },
   Pending:       { bg: '#F59E0B', color: '#FFFFFF' },
   Delay:         { bg: '#EF4444', color: '#FFFFFF' },
+  Hold:          { bg: '#8B5CF6', color: '#FFFFFF' },
 };
 
 const LEGEND = [
@@ -19,11 +20,15 @@ const LEGEND = [
   { label: 'In-progress', bg: '#0D9488' },
   { label: 'Potential Delay', bg: '#F59E0B' },
   { label: 'Delay', bg: '#EF4444' },
+  { label: 'Hold', bg: '#8B5CF6' },
   { label: 'Not Start', bg: '#9CA3AF' },
 ];
 
 function getStyle(status) {
-  return STATUS_STYLE[status] || { bg: '#9CA3AF', color: '#FFFFFF' };
+  const s = String(status ?? '').trim();
+  // The sheet may say "hold", "HOLD" or "On Hold" — all mean the same thing here.
+  if (/^(on[\s-]*)?hold$/i.test(s)) return STATUS_STYLE.Hold;
+  return STATUS_STYLE[s] || { bg: '#9CA3AF', color: '#FFFFFF' };
 }
 
 function sprintNum(name) {
