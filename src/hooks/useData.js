@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { rawAll, rawBugs } from '../data/sampleData';
-import { fetchAllCards, fetchBugs, fetchMAIssues, fetchTeamMembers, fetchSprintGoals, fetchNextSprintGoals, fetchOverviewUpdate, fetchSprintList, fetchMilestones, fetchMilestonePhases, fetchIssuesEncountered, fetchProject, resolveSprintDates, isGoogleSheetsConfigured } from '../data/googleSheets';
+import { fetchAllCards, fetchBugs, fetchMAIssues, fetchTeamMembers, fetchSprintGoals, fetchNextSprintGoals, fetchOverviewUpdate, fetchSprintList, fetchMilestones, fetchMilestonePhases, fetchIssuesEncountered, fetchRetrospective, fetchProject, resolveSprintDates, isGoogleSheetsConfigured } from '../data/googleSheets';
 
 export function useData() {
   const [cards, setCards] = useState(rawAll);
@@ -10,6 +10,7 @@ export function useData() {
   const [sprintGoals, setSprintGoals] = useState({ meta: {}, items: [] });
   const [nextSprintGoals, setNextSprintGoals] = useState({ meta: {}, items: [] });
   const [issues, setIssues] = useState([]);
+  const [retrospective, setRetrospective] = useState({ items: [], summary: null, headers: null });
   const [overviewUpdate, setOverviewUpdate] = useState([]);
   const [sprintList, setSprintList] = useState([]);
   const [milestones, setMilestones] = useState([]);
@@ -54,6 +55,10 @@ export function useData() {
       .then((i) => { console.log('Issues loaded:', i.length); setIssues(i); })
       .catch((err) => console.warn('fetchIssuesEncountered failed:', err));
 
+    const loadRetrospective = fetchRetrospective()
+      .then((r) => { console.log('Retrospective loaded:', r.items.length, 'summary:', Boolean(r.summary)); setRetrospective(r); })
+      .catch((err) => console.warn('fetchRetrospective failed:', err));
+
     const loadOverview = fetchOverviewUpdate()
       .then((o) => { console.log('Overview Update loaded:', o.length); setOverviewUpdate(o); })
       .catch((err) => console.warn('fetchOverviewUpdate failed:', err));
@@ -74,7 +79,7 @@ export function useData() {
       .then((p) => { console.log('Project loaded:', p.name); setProject(p); })
       .catch((err) => console.warn('fetchProject failed:', err));
 
-    Promise.all([loadCards, loadBugs, loadMAIssues, loadTeam, loadGoals, loadNextGoals, loadIssues, loadOverview, loadSprintList, loadProject, loadMilestones, loadMilestonePhases]).finally(() => {
+    Promise.all([loadCards, loadBugs, loadMAIssues, loadTeam, loadGoals, loadNextGoals, loadIssues, loadRetrospective, loadOverview, loadSprintList, loadProject, loadMilestones, loadMilestonePhases]).finally(() => {
       setSource(cardsOk || bugsOk ? 'google' : 'sample');
       setLoading(false);
     });
@@ -84,5 +89,5 @@ export function useData() {
   const resolvedGoals = useMemo(() => resolveSprintDates(sprintGoals, sprintList), [sprintGoals, sprintList]);
   const resolvedNextGoals = useMemo(() => resolveSprintDates(nextSprintGoals, sprintList), [nextSprintGoals, sprintList]);
 
-  return { cards, bugs, maIssues, team, sprintGoals: resolvedGoals, nextSprintGoals: resolvedNextGoals, issues, overviewUpdate, sprintList, milestones, milestonePhases, project, loading, source };
+  return { cards, bugs, maIssues, team, sprintGoals: resolvedGoals, nextSprintGoals: resolvedNextGoals, issues, retrospective, overviewUpdate, sprintList, milestones, milestonePhases, project, loading, source };
 }

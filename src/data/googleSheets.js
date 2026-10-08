@@ -304,6 +304,65 @@ export async function fetchIssuesEncountered() {
   })).filter((r) => r.issue);
 }
 
+/**
+ * Retrospective sheet — one row per team member, plus a last "Summarize" row
+ * the facilitator fills in with the team-wide takeaway for each question.
+ * Columns: Team Member, then four free-text questions (each header carries a
+ * long English + Thai prompt, so we read by position rather than exact text):
+ *   B: What went well?, C: What didn't go well?, D: What should we improve?,
+ *   E: Action Item.
+ * Object.values(r) preserves column order because parseRows/parseGvizJson
+ * build each row by iterating headers left-to-right.
+ */
+function parseRetrospectiveSheet(rows) {
+  const items = [];
+  let summary = null;
+
+  // Read the question wording straight off the sheet's header row (object key
+  // order mirrors column order — see note above) instead of hardcoding it, so
+  // the slide always matches whatever the facilitator wrote in the sheet.
+  const headerKeys = rows.length ? Object.keys(rows[0]) : [];
+  const headers = {
+    wentWell: (headerKeys[1] || '').trim(),
+    notWell: (headerKeys[2] || '').trim(),
+    improve: (headerKeys[3] || '').trim(),
+    action: (headerKeys[4] || '').trim(),
+  };
+
+  rows.forEach((r) => {
+    const [memberRaw = '', wentWellRaw = '', notWellRaw = '', improveRaw = '', actionRaw = ''] = Object.values(r);
+    const member = (memberRaw || '').trim();
+    if (!member) return;
+
+    const key = member.toLowerCase();
+    if (key === 'example') return;
+
+    // Sheets save a hard-wrapped line as \r\n — fold it to \n so every
+    // consumer only has to split on one thing.
+    const norm = (s) => (s || '').replace(/\r\n?/g, '\n');
+    const row = {
+      member,
+      wentWell: norm(wentWellRaw),
+      notWell: norm(notWellRaw),
+      improve: norm(improveRaw),
+      action: norm(actionRaw),
+    };
+
+    if (key === 'summarize' || key === 'summary') {
+      summary = row;
+      return;
+    }
+    if (row.wentWell || row.notWell || row.improve || row.action) items.push(row);
+  });
+
+  return { items, summary, headers };
+}
+
+export async function fetchRetrospective() {
+  const rows = await fetchSheet('Retrospective');
+  return parseRetrospectiveSheet(rows);
+}
+
 export function isGoogleSheetsConfigured() {
   return Boolean(getSheetId());
 }
