@@ -59,11 +59,14 @@ function splitIntoColumns(tree) {
 
   if (totalLines <= MAX_LINES_PER_COL) return [tree];
 
-  const numCols = Math.min(Math.ceil(totalLines / MAX_LINES_PER_COL), MAX_COLS);
-  if (numCols === 1) return [tree];
-
   const epicLines = tree.map(countEpicLines);
   const n = epicLines.length;
+
+  // Can't split n epics into more than n non-empty columns — the DP below has
+  // no valid solution past that point and silently produces empty leading
+  // columns (every epic crammed into the last one) if numCols > n.
+  const numCols = Math.min(Math.ceil(totalLines / MAX_LINES_PER_COL), MAX_COLS, n);
+  if (numCols <= 1) return [tree];
 
   // Prefix sums
   const prefix = [0];
