@@ -15,7 +15,7 @@ import DefectAnalysis from './DefectAnalysis';
 import MAAnalysis from './MAAnalysis';
 import MATimeline from './MATimeline';
 import { CardInSprintAssignee, CardInSprintBugs } from './CardInSprint';
-import Retrospective from './Retrospective';
+import Retrospective, { computeRetrospectivePageCount } from './Retrospective';
 import IssuesEncountered from './IssuesEncountered';
 import NextSprintGoals from './NextSprintGoals';
 import ThankYouPage from './ThankYouPage';
@@ -36,7 +36,7 @@ const STATIC_PRESENT = [
   { id: 'ma-timeline', label: 'MA Timeline', Component: MATimeline },
   '__CARDS__',
   { id: 'card-bugs', label: 'Card in Sprint: Bug', Component: CardInSprintBugs },
-  { id: 'retro', label: 'Retrospective', Component: Retrospective },
+  '__RETRO__',
   { id: 'issues', label: 'Issues Encountered', Component: IssuesEncountered },
   { id: 'next-goals', label: 'Next Sprint Goals', Component: NextSprintGoals },
   { id: 'thankyou', label: 'Thank You', Component: ThankYouPage },
@@ -86,6 +86,13 @@ export default function PresentMode({ data, onExit }) {
         }))
       : [];
 
+    const retroPageCount = computeRetrospectivePageCount(data);
+    const retroSlides = Array.from({ length: retroPageCount }, (_, i) => ({
+      id: `retro-${i}`,
+      label: retroPageCount > 1 ? `Retrospective ${i + 1}/${retroPageCount}` : 'Retrospective',
+      render: (props) => <Retrospective data={props.data} slideRef={props.slideRef} forcePage={i} />,
+    }));
+
     STATIC_PRESENT.forEach((s) => {
       if (s === '__CARDS__') {
         result.push(...cardSlides);
@@ -93,6 +100,8 @@ export default function PresentMode({ data, onExit }) {
         result.push(...overviewSlides);
       } else if (s === '__MILESTONES__') {
         result.push(...milestoneSlides);
+      } else if (s === '__RETRO__') {
+        result.push(...retroSlides);
       } else {
         result.push({
           ...s,

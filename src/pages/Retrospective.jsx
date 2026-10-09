@@ -196,6 +196,16 @@ const EmptyState = ({ slideRef }) => (
   </SlideLayout>
 );
 
+/** Compute total page count without rendering — used by PresentMode to step through slides. */
+export function computeRetrospectivePageCount(data) {
+  const rows = data.retrospective?.items || [];
+  const summary = data.retrospective?.summary || null;
+  const headers = data.retrospective?.headers || null;
+  const columns = buildColumns(headers);
+  const total = paginateRows(rows).length + buildSummaryPages(summary, columns).length;
+  return Math.max(total, 1);
+}
+
 export default function Retrospective({ data, slideRef, forcePage }) {
   const rows = data.retrospective?.items || [];
   const summary = data.retrospective?.summary || null;
